@@ -52,8 +52,14 @@ class TP_Activator {
 	 * register_activation_hook() does not fire when activating via WP-CLI.
 	 * This method is called on the 'init' hook; if the table doesn't exist,
 	 * it creates it so the plugin works correctly after CLI activation.
+	 *
+	 * The tp_db_version short-circuit (WR-02 fix) avoids a SHOW TABLES
+	 * database query on every page load once the table is up to date.
 	 */
 	public static function maybe_create_table(): void {
+		if ( get_option( 'tp_db_version' ) === TP_PLUGIN_VERSION ) {
+			return;
+		}
 		global $wpdb;
 		$table = $wpdb->prefix . 'tp_reviews';
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
@@ -94,12 +100,42 @@ class TP_Activator {
   PRIMARY KEY  (id),
   UNIQUE KEY review_id (review_id),
   KEY stars (stars),
-  KEY published_at (published_at),
-  FULLTEXT KEY body (body)
+  KEY published_at (published_at)
 ) {$charset_collate};";
 
 		dbDelta( $sql );
 
+		self::maybe_add_fulltext_index();
+
 		update_option( 'tp_db_version', TP_PLUGIN_VERSION );
+	}
+
+	/**
+	 * Adds the FULLTEXT index on the body column if it does not already exist.
+	 *
+	 * dbDelta() cannot parse FULLTEXT KEY so the index must be managed
+	 * separately via a direct $wpdb->query() call (Pitfall P4 — CR-01 fix).
+	 * The SHOW INDEX check ensures this is idempotent on every upgrade call.
+	 */
+	private static function maybe_add_fulltext_index(): void {
+		global $wpdb;
+		$table = $wpdb->prefix . 'tp_reviews';
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$exists = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM information_schema.STATISTICS
+				  WHERE table_schema = %s
+				    AND table_name   = %s
+				    AND index_name   = 'body'",
+				DB_NAME,
+				$table
+			)
+		);
+
+		if ( ! $exists ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->query( "ALTER TABLE `{$table}` ADD FULLTEXT KEY body (body)" );
+		}
 	}
 }
