@@ -15,7 +15,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 global $wpdb;
 
 // 1. Drop the custom reviews table.
-$wpdb->query( 'DROP TABLE IF EXISTS ' . $wpdb->prefix . 'tp_reviews' );
+$wpdb->query( 'DROP TABLE IF EXISTS ' . $wpdb->prefix . 'tp_reviews' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
 // 2. Delete all tp_* wp_options entries.
 

@@ -255,7 +255,7 @@ class TP_API_Client {
 				'author'       => sanitize_text_field( $item['consumer']['displayName'] ?? '' ),
 				'published_at' => sanitize_text_field( $item['createdAt'] ?? '0000-00-00 00:00:00' ),
 				'language'     => sanitize_text_field( $item['language'] ?? '' ),
-				'is_verified'  => ( isset( $item['reviewVerificationLevel'] ) && 'BUSINESS_GENERATED' === $item['reviewVerificationLevel'] ) ? 1 : 0,
+				'is_verified'  => ( isset( $item['reviewVerificationLevel'] ) && in_array( $item['reviewVerificationLevel'], [ 'VERIFIED', 'SEMI_VERIFIED' ], true ) ) ? 1 : 0,
 				'raw_json'     => wp_json_encode( $item ),
 			];
 		}
