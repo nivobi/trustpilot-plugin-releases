@@ -1,0 +1,41 @@
+<?php
+/**
+ * Uninstall — runs when the admin deletes the plugin (not just deactivates it).
+ *
+ * Removes all plugin data:
+ *   - The wp_tp_reviews custom table
+ *   - All tp_* wp_options entries
+ *   - The tp_daily_sync WP-Cron hook
+ */
+
+if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
+	exit;
+}
+
+global $wpdb;
+
+// 1. Drop the custom reviews table.
+$wpdb->query( 'DROP TABLE IF EXISTS ' . $wpdb->prefix . 'tp_reviews' );
+
+// 2. Delete all tp_* wp_options entries.
+
+// Phase 1 — core runtime options.
+delete_option( 'tp_db_version' );
+delete_option( 'tp_last_sync' );
+delete_option( 'tp_last_sync_count' );
+delete_option( 'tp_last_error' );
+delete_option( 'tp_trust_score' );
+delete_option( 'tp_review_count' );
+delete_option( 'tp_profile_url' );
+delete_option( 'tp_is_initial_sync_done' );
+
+// Phase 2 — API credentials.
+delete_option( 'tp_api_key' );
+delete_option( 'tp_api_secret' );
+delete_option( 'tp_business_unit_id' );
+
+// Phase 3 — preset manager.
+delete_option( 'tp_presets' );
+
+// 3. Clear the scheduled cron hook.
+wp_clear_scheduled_hook( 'tp_daily_sync' );
