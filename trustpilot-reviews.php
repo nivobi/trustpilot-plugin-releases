@@ -25,6 +25,7 @@ require_once TP_PLUGIN_DIR . 'includes/class-activator.php';
 require_once TP_PLUGIN_DIR . 'includes/class-api-client.php';
 require_once TP_PLUGIN_DIR . 'includes/class-sync-engine.php';
 require_once TP_PLUGIN_DIR . 'includes/class-preset-manager.php';
+require_once TP_PLUGIN_DIR . 'includes/class-shortcode.php';
 
 register_activation_hook( __FILE__, [ 'TP_Activator', 'activate' ] );
 
@@ -36,6 +37,9 @@ add_action( 'init', function() {
 
 	// WP-CLI activation fallback (Pitfall P3): if the table doesn't exist, create it.
 	TP_Activator::maybe_create_table();
+
+	// Register the [tp_reviews] shortcode and frontend CSS (D-16, RESEARCH.md Pattern 1).
+	TP_Shortcode::register_hooks();
 } );
 
 /**
