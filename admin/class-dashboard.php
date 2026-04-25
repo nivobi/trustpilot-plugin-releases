@@ -44,7 +44,7 @@ class TP_Dashboard {
 
 		wp_safe_redirect( add_query_arg(
 			[
-				'page'   => 'tp-dashboard',
+				'page'   => 'tp-reviews',
 				'synced' => '1',
 			],
 			admin_url( 'admin.php' )
@@ -59,7 +59,10 @@ class TP_Dashboard {
 	 * tp_last_sync_count, tp_last_error) and runs a COUNT(*) query against
 	 * the reviews table to show total reviews in the database.
 	 */
-	public static function render(): void {
+	/**
+	 * Render sync status panel (no page wrapper). Called from TP_Preset_UI::render().
+	 */
+	public static function render_panel(): void {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
@@ -73,7 +76,6 @@ class TP_Dashboard {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 		$total_reviews = (int) $wpdb->get_var( "SELECT COUNT(*) FROM `{$table}`" );
 
-		// Format last sync timestamp or show "Never".
 		if ( empty( $last_sync ) ) {
 			$sync_display = esc_html__( 'Never', 'trustpilot-reviews' );
 		} else {
@@ -85,57 +87,63 @@ class TP_Dashboard {
 			);
 		}
 
-		// Show "—" em dash when count is 0 and tp_last_sync is empty (never synced).
 		$count_display = ( 0 === $last_count && empty( $last_sync ) )
 			? '&mdash;'
 			: esc_html( (string) $last_count );
 
-		// Detect synced=1 query arg for success notice (display-only; no nonce needed).
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$synced = isset( $_GET['synced'] ) && '1' === $_GET['synced'];
 		?>
+		<?php if ( $synced ) : ?>
+			<div class="notice notice-success is-dismissible">
+				<p><?php esc_html_e( 'Sync completed successfully.', 'trustpilot-reviews' ); ?></p>
+			</div>
+		<?php endif; ?>
+
+		<?php if ( ! empty( $last_error ) ) : ?>
+			<div class="notice notice-warning">
+				<p>
+					<?php esc_html_e( 'Last sync error:', 'trustpilot-reviews' ); ?>
+					<?php echo ' ' . esc_html( $last_error ); ?>
+				</p>
+			</div>
+		<?php endif; ?>
+
+		<div class="tp-status-card">
+			<table class="tp-status-table">
+				<tr>
+					<td class="tp-status-label"><?php esc_html_e( 'Last sync', 'trustpilot-reviews' ); ?></td>
+					<td class="tp-status-value"><?php echo $sync_display; // Already escaped above. ?></td>
+				</tr>
+				<tr>
+					<td class="tp-status-label"><?php esc_html_e( 'Reviews in database', 'trustpilot-reviews' ); ?></td>
+					<td class="tp-status-value"><?php echo esc_html( (string) $total_reviews ); ?></td>
+				</tr>
+				<tr>
+					<td class="tp-status-label"><?php esc_html_e( 'Last sync count', 'trustpilot-reviews' ); ?></td>
+					<td class="tp-status-value"><?php echo $count_display; // esc_html() applied above or literal &mdash;. ?></td>
+				</tr>
+			</table>
+		</div>
+
+		<div class="tp-sync-form">
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+				<input type="hidden" name="action" value="tp_sync_now">
+				<?php wp_nonce_field( 'tp_sync_now' ); ?>
+				<?php submit_button( __( 'Sync Now', 'trustpilot-reviews' ), 'secondary' ); ?>
+			</form>
+		</div>
+		<?php
+	}
+
+	public static function render(): void {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		?>
 		<div class="wrap">
 			<h1><?php esc_html_e( 'Trustpilot Dashboard', 'trustpilot-reviews' ); ?></h1>
-
-			<?php if ( $synced ) : ?>
-				<div class="notice notice-success is-dismissible">
-					<p><?php esc_html_e( 'Sync completed successfully.', 'trustpilot-reviews' ); ?></p>
-				</div>
-			<?php endif; ?>
-
-			<?php if ( ! empty( $last_error ) ) : ?>
-				<div class="notice notice-warning">
-					<p>
-						<?php esc_html_e( 'Last sync error:', 'trustpilot-reviews' ); ?>
-						<?php echo ' ' . esc_html( $last_error ); ?>
-					</p>
-				</div>
-			<?php endif; ?>
-
-			<div class="tp-status-card">
-				<table class="tp-status-table">
-					<tr>
-						<td class="tp-status-label"><?php esc_html_e( 'Last sync', 'trustpilot-reviews' ); ?></td>
-						<td class="tp-status-value"><?php echo $sync_display; // Already escaped above. ?></td>
-					</tr>
-					<tr>
-						<td class="tp-status-label"><?php esc_html_e( 'Reviews in database', 'trustpilot-reviews' ); ?></td>
-						<td class="tp-status-value"><?php echo esc_html( (string) $total_reviews ); ?></td>
-					</tr>
-					<tr>
-						<td class="tp-status-label"><?php esc_html_e( 'Last sync count', 'trustpilot-reviews' ); ?></td>
-						<td class="tp-status-value"><?php echo $count_display; // esc_html() applied above or literal &mdash;. ?></td>
-					</tr>
-				</table>
-			</div>
-
-			<div class="tp-sync-form">
-				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-					<input type="hidden" name="action" value="tp_sync_now">
-					<?php wp_nonce_field( 'tp_sync_now' ); ?>
-					<?php submit_button( __( 'Sync Now', 'trustpilot-reviews' ), 'secondary' ); ?>
-				</form>
-			</div>
+			<?php self::render_panel(); ?>
 		</div>
 		<?php
 	}

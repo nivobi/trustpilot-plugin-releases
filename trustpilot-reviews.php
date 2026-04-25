@@ -93,18 +93,7 @@ if ( is_admin() ) {
 		);
 		TP_Preset_UI::$presets_hook = (string) $presets_hook;
 
-		// Second sub-page — Dashboard.
-		$dashboard_hook = add_submenu_page(
-			'tp-reviews',
-			__( 'Dashboard', 'trustpilot-reviews' ),
-			__( 'Dashboard', 'trustpilot-reviews' ),
-			'manage_options',
-			'tp-dashboard',
-			[ 'TP_Dashboard', 'render' ]
-		);
-		$tp_settings->dashboard_hook = (string) $dashboard_hook;
-
-		// Third sub-page — Settings.
+		// Second sub-page — Settings.
 		$settings_hook = add_submenu_page(
 			'tp-reviews',
 			__( 'Settings', 'trustpilot-reviews' ),

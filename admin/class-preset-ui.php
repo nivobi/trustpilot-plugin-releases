@@ -74,7 +74,7 @@ class TP_Preset_UI {
         // Validate slug is non-empty after sanitize_title().
         if ( empty( $new_slug ) && empty( $original_slug ) ) {
             wp_safe_redirect( add_query_arg(
-                [ 'page' => 'tp-presets', 'result' => 'error_invalid' ],
+                [ 'page' => 'tp-reviews', 'result' => 'error_invalid' ],
                 admin_url( 'admin.php' )
             ) );
             exit;
@@ -107,7 +107,7 @@ class TP_Preset_UI {
             if ( ! $found ) {
                 // Preset to update no longer exists — treat as invalid.
                 wp_safe_redirect( add_query_arg(
-                    [ 'page' => 'tp-presets', 'result' => 'error_invalid' ],
+                    [ 'page' => 'tp-reviews', 'result' => 'error_invalid' ],
                     admin_url( 'admin.php' )
                 ) );
                 exit;
@@ -116,7 +116,7 @@ class TP_Preset_UI {
             // Create path: validate slug is non-empty.
             if ( empty( $new_slug ) ) {
                 wp_safe_redirect( add_query_arg(
-                    [ 'page' => 'tp-presets', 'result' => 'error_invalid' ],
+                    [ 'page' => 'tp-reviews', 'result' => 'error_invalid' ],
                     admin_url( 'admin.php' )
                 ) );
                 exit;
@@ -126,7 +126,7 @@ class TP_Preset_UI {
             foreach ( $presets as $existing ) {
                 if ( $existing['slug'] === $new_slug ) {
                     wp_safe_redirect( add_query_arg(
-                        [ 'page' => 'tp-presets', 'result' => 'error_slug_exists' ],
+                        [ 'page' => 'tp-reviews', 'result' => 'error_slug_exists' ],
                         admin_url( 'admin.php' )
                     ) );
                     exit;
@@ -143,14 +143,14 @@ class TP_Preset_UI {
 
         if ( ! TP_Preset_Manager::save( $presets ) ) {
             wp_safe_redirect( add_query_arg(
-                [ 'page' => 'tp-presets', 'result' => 'error_invalid' ],
+                [ 'page' => 'tp-reviews', 'result' => 'error_invalid' ],
                 admin_url( 'admin.php' )
             ) );
             exit;
         }
 
         wp_safe_redirect( add_query_arg(
-            [ 'page' => 'tp-presets', 'result' => 'saved' ],
+            [ 'page' => 'tp-reviews', 'result' => 'saved' ],
             admin_url( 'admin.php' )
         ) );
         exit;
@@ -170,7 +170,7 @@ class TP_Preset_UI {
 
         if ( empty( $slug ) ) {
             wp_safe_redirect( add_query_arg(
-                [ 'page' => 'tp-presets', 'result' => 'error_invalid' ],
+                [ 'page' => 'tp-reviews', 'result' => 'error_invalid' ],
                 admin_url( 'admin.php' )
             ) );
             exit;
@@ -187,14 +187,14 @@ class TP_Preset_UI {
         // Remove preset with matching slug and persist via Preset Manager.
         if ( ! TP_Preset_Manager::delete( $slug ) ) {
             wp_safe_redirect( add_query_arg(
-                [ 'page' => 'tp-presets', 'result' => 'error_invalid' ],
+                [ 'page' => 'tp-reviews', 'result' => 'error_invalid' ],
                 admin_url( 'admin.php' )
             ) );
             exit;
         }
 
         wp_safe_redirect( add_query_arg(
-            [ 'page' => 'tp-presets', 'result' => 'deleted' ],
+            [ 'page' => 'tp-reviews', 'result' => 'deleted' ],
             admin_url( 'admin.php' )
         ) );
         exit;
@@ -266,6 +266,7 @@ class TP_Preset_UI {
         ?>
         <div class="wrap">
             <h1><?php esc_html_e( 'Presets', 'trustpilot-reviews' ); ?></h1>
+            <?php TP_Dashboard::render_panel(); ?>
 
             <?php
             // Admin notices (UI-SPEC: Admin Notices table).
@@ -314,7 +315,7 @@ class TP_Preset_UI {
                                 <td><?php echo esc_html( (string) $preset['limit'] ); ?></td>
                                 <td class="tp-actions-cell">
                                     <a href="<?php echo esc_url( add_query_arg( [
-                                        'page'   => 'tp-presets',
+                                        'page'   => 'tp-reviews',
                                         'action' => 'edit',
                                         'preset' => $preset['slug'],
                                     ], admin_url( 'admin.php' ) ) ); ?>"><?php esc_html_e( 'Edit', 'trustpilot-reviews' ); ?></a>

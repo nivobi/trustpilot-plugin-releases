@@ -20,9 +20,6 @@ class TP_Settings_Page {
     /** @var string Hook suffix returned by add_submenu_page() for the Settings sub-page */
     public string $settings_hook = '';
 
-    /** @var string Hook suffix returned by add_submenu_page() for the Dashboard sub-page (stored here for CSS enqueue) */
-    public string $dashboard_hook = '';
-
     /**
      * Register WordPress hooks for this class.
      *
@@ -309,7 +306,7 @@ class TP_Settings_Page {
      * @param string $hook Current admin page hook suffix.
      */
     public function enqueue_admin_styles( string $hook ): void {
-        $allowed = array_filter( [ $this->settings_hook, $this->dashboard_hook ] );
+        $allowed = array_filter( [ $this->settings_hook ] );
         if ( empty( $allowed ) || ! in_array( $hook, $allowed, true ) ) {
             return;
         }
