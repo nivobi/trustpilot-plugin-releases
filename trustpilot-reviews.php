@@ -46,10 +46,12 @@ add_action( 'init', function() {
 if ( is_admin() ) {
 	require_once TP_PLUGIN_DIR . 'admin/class-settings-page.php';
 	require_once TP_PLUGIN_DIR . 'admin/class-dashboard.php';
+	require_once TP_PLUGIN_DIR . 'admin/class-preset-ui.php';
 
 	$tp_settings = new TP_Settings_Page();
 	$tp_settings->register_hooks();
 	TP_Dashboard::register_hooks();
+	TP_Preset_UI::register_hooks();
 
 	add_action( 'admin_menu', function() use ( $tp_settings ) {
 		// Top-level menu item — appears in sidebar alongside Pages, Posts (D-02).
@@ -87,5 +89,18 @@ if ( is_admin() ) {
 		// enqueue_admin_styles() can gate CSS loading to plugin pages only.
 		$tp_settings->settings_hook  = (string) $settings_hook;
 		$tp_settings->dashboard_hook = (string) $dashboard_hook;
+
+		// Third sub-page — Presets (D-01, Phase 3).
+		$presets_hook = add_submenu_page(
+			'tp-reviews',
+			__( 'Presets', 'trustpilot-reviews' ),
+			__( 'Presets', 'trustpilot-reviews' ),
+			'manage_options',
+			'tp-presets',
+			[ 'TP_Preset_UI', 'render' ]
+		);
+
+		// Store hook suffix into TP_Preset_UI static property for CSS enqueue gate (D-02).
+		TP_Preset_UI::$presets_hook = (string) $presets_hook;
 	} );
 }
