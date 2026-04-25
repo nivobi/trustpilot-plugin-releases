@@ -84,14 +84,8 @@ class TP_Preset_UI {
         $min_stars = max( 1, min( 5, $min_stars ) );
         $limit     = max( 1, min( 100, $limit ) );
 
-        // Load existing presets (D-10 storage format).
-        $presets = get_option( 'tp_presets', [] );
-        if ( is_string( $presets ) ) {
-            $presets = json_decode( $presets, true ) ?? [];
-        }
-        if ( ! is_array( $presets ) ) {
-            $presets = [];
-        }
+        // Load existing presets via shared Preset Manager (D-10 storage format).
+        $presets = TP_Preset_Manager::get_all();
 
         $is_update = ! empty( $original_slug );
 
@@ -147,15 +141,13 @@ class TP_Preset_UI {
             ];
         }
 
-        $encoded = wp_json_encode( $presets );
-        if ( false === $encoded ) {
+        if ( ! TP_Preset_Manager::save( $presets ) ) {
             wp_safe_redirect( add_query_arg(
                 [ 'page' => 'tp-presets', 'result' => 'error_invalid' ],
                 admin_url( 'admin.php' )
             ) );
             exit;
         }
-        update_option( 'tp_presets', $encoded );
 
         wp_safe_redirect( add_query_arg(
             [ 'page' => 'tp-presets', 'result' => 'saved' ],
@@ -192,28 +184,14 @@ class TP_Preset_UI {
             wp_die( esc_html__( 'Insufficient permissions.', 'trustpilot-reviews' ) );
         }
 
-        $presets = get_option( 'tp_presets', [] );
-        if ( is_string( $presets ) ) {
-            $presets = json_decode( $presets, true ) ?? [];
-        }
-        if ( ! is_array( $presets ) ) {
-            $presets = [];
-        }
-
-        // Remove preset with matching slug, re-index array.
-        $presets = array_values( array_filter( $presets, static function( $preset ) use ( $slug ) {
-            return $preset['slug'] !== $slug;
-        } ) );
-
-        $encoded = wp_json_encode( $presets );
-        if ( false === $encoded ) {
+        // Remove preset with matching slug and persist via Preset Manager.
+        if ( ! TP_Preset_Manager::delete( $slug ) ) {
             wp_safe_redirect( add_query_arg(
                 [ 'page' => 'tp-presets', 'result' => 'error_invalid' ],
                 admin_url( 'admin.php' )
             ) );
             exit;
         }
-        update_option( 'tp_presets', $encoded );
 
         wp_safe_redirect( add_query_arg(
             [ 'page' => 'tp-presets', 'result' => 'deleted' ],
@@ -255,14 +233,8 @@ class TP_Preset_UI {
             return;
         }
 
-        // Load presets from wp_options (D-10).
-        $presets = get_option( 'tp_presets', [] );
-        if ( is_string( $presets ) ) {
-            $presets = json_decode( $presets, true ) ?? [];
-        }
-        if ( ! is_array( $presets ) ) {
-            $presets = [];
-        }
+        // Load presets via shared Preset Manager (D-10).
+        $presets = TP_Preset_Manager::get_all();
 
         // Detect edit mode: ?action=edit&preset={slug}
         // phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only display, no state change.
