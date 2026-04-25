@@ -266,7 +266,7 @@ class TP_Shortcode {
                 return sprintf(
                     /* translators: %s: human-readable time difference e.g. "3 months" */
                     __( '%s ago', 'trustpilot-reviews' ),
-                    human_time_diff( $ts, current_time( 'timestamp' ) )
+                    human_time_diff( $ts, time() )
                 );
 
             case 'month_year':
@@ -358,15 +358,17 @@ class TP_Shortcode {
         if ( self::$schema_rendered ) {
             return '';
         }
-        self::$schema_rendered = true;
 
         $score = get_option( 'tp_trust_score',  '' );
         $count = get_option( 'tp_review_count', '' );
 
         // No schema output until sync has run and populated compliance options.
+        // Flag is NOT set here — options may be populated on a subsequent render.
         if ( '' === (string) $score || '' === (string) $count ) {
             return '';
         }
+
+        self::$schema_rendered = true;  // only latch after all early returns
 
         $schema = [
             '@context'    => 'https://schema.org',
@@ -377,9 +379,11 @@ class TP_Shortcode {
             'worstRating' => '1',
         ];
 
-        return '<script type="application/ld+json">'
-             . wp_json_encode( $schema )
-             . '</script>';
+        $json = wp_json_encode( $schema );
+        if ( false === $json ) {
+            return '';
+        }
+        return '<script type="application/ld+json">' . $json . '</script>';
     }
 
 }   // end class TP_Shortcode
