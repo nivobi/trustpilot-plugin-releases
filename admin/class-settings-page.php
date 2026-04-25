@@ -67,6 +67,20 @@ class TP_Settings_Page {
         add_settings_field( 'tp_api_key',        __( 'API Key',         'trustpilot-reviews' ), [ $this, 'render_api_key_field'    ], self::PAGE_SLUG, 'tp_api_section' );
         add_settings_field( 'tp_api_secret',      __( 'API Secret',      'trustpilot-reviews' ), [ $this, 'render_api_secret_field' ], self::PAGE_SLUG, 'tp_api_section' );
         add_settings_field( 'tp_business_domain', __( 'Business Domain', 'trustpilot-reviews' ), [ $this, 'render_domain_field'     ], self::PAGE_SLUG, 'tp_api_section' );
+
+        register_setting( self::OPTION_GROUP, 'tp_date_format', [
+            'type'              => 'string',
+            'default'           => 'month_year',
+            'sanitize_callback' => [ $this, 'sanitize_date_format' ],
+        ] );
+
+        add_settings_field(
+            'tp_date_format',
+            __( 'Review date format', 'trustpilot-reviews' ),
+            [ $this, 'render_date_format_field' ],
+            self::PAGE_SLUG,
+            'tp_api_section'
+        );
     }
 
     /**
@@ -123,6 +137,46 @@ class TP_Settings_Page {
             return (string) get_option( 'tp_api_secret', '' );
         }
         return $value;
+    }
+
+    /**
+     * Sanitize the tp_date_format option value.
+     *
+     * Allowlist pattern — only the three declared format keys are accepted.
+     * Any other value (e.g. empty string, arbitrary input) falls back to 'month_year'.
+     *
+     * @param string $value Raw value from POST submission.
+     * @return string One of: 'month_year', 'relative', 'full_date'.
+     */
+    public function sanitize_date_format( string $value ): string {
+        $allowed = [ 'month_year', 'relative', 'full_date' ];
+        return in_array( $value, $allowed, true ) ? $value : 'month_year';
+    }
+
+    /**
+     * Render the Review date format select field.
+     *
+     * Uses get_option('tp_date_format', 'month_year') for the saved value.
+     * Uses the selected() WP helper to mark the active option.
+     * All option labels are translatable via __() (D-14).
+     */
+    public function render_date_format_field(): void {
+        $current = (string) get_option( 'tp_date_format', 'month_year' );
+        $options = [
+            'month_year' => __( 'Month and year (e.g. March 2024)', 'trustpilot-reviews' ),
+            'relative'   => __( 'Relative (e.g. 3 months ago)',      'trustpilot-reviews' ),
+            'full_date'  => __( 'Full date (e.g. 15 March 2024)',    'trustpilot-reviews' ),
+        ];
+        echo '<select id="tp_date_format" name="tp_date_format">';
+        foreach ( $options as $value => $label ) {
+            printf(
+                '<option value="%s"%s>%s</option>',
+                esc_attr( $value ),
+                selected( $current, $value, false ),
+                esc_html( $label )
+            );
+        }
+        echo '</select>';
     }
 
     /**
