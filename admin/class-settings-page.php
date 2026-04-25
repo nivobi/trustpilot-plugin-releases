@@ -227,8 +227,17 @@ class TP_Settings_Page {
             ? sanitize_text_field( wp_unslash( $_POST['tp_api_key'] ) )
             : (string) get_option( 'tp_api_key', '' );
 
+        // Normalise: strip protocol and trailing slashes so both
+        // "https://example.com/" and "example.com" resolve correctly.
+        $lookup_domain = $domain;
+        if ( preg_match( '#^https?://#i', $domain ) ) {
+            $parsed        = wp_parse_url( $domain );
+            $lookup_domain = isset( $parsed['host'] ) ? $parsed['host'] : $domain;
+        }
+        $lookup_domain = rtrim( $lookup_domain, '/' );
+
         $url = add_query_arg(
-            [ 'name' => $domain ],
+            [ 'name' => $lookup_domain ],
             'https://api.trustpilot.com/v1/business-units/find'
         );
 
