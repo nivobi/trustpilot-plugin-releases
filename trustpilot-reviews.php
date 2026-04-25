@@ -28,6 +28,17 @@ require_once TP_PLUGIN_DIR . 'includes/class-sync-engine.php';
 require_once TP_PLUGIN_DIR . 'includes/class-preset-manager.php';
 require_once TP_PLUGIN_DIR . 'includes/class-shortcode.php';
 
+// Prevent WordPress from matching this plugin against the wp.org update API.
+// The slug "trustpilot-reviews" conflicts with a public wp.org plugin — without
+// this filter WordPress would offer that plugin's updates as if they applied here.
+add_filter( 'site_transient_update_plugins', static function( $transient ) {
+	$basename = plugin_basename( TP_PLUGIN_FILE );
+	if ( isset( $transient->response[ $basename ] ) ) {
+		unset( $transient->response[ $basename ] );
+	}
+	return $transient;
+} );
+
 register_activation_hook( __FILE__, [ 'TP_Activator', 'activate' ] );
 
 register_deactivation_hook( __FILE__, [ 'TP_Activator', 'deactivate' ] );
