@@ -1,0 +1,170 @@
+/*
+ * Trustpilot Reviews — Frontend Styles
+ *
+ * Namespaced with .tp- prefix to prevent collision with themes or other plugins.
+ * Loaded only on pages that render [tp_reviews] shortcode (wp_enqueue_style inside
+ * render() — flushed via wp_footer, not wp_head). Theme developers can override any
+ * rule by targeting the same .tp- class with higher specificity in their theme CSS.
+ *
+ * @since 1.0.0
+ */
+
+/* ── Wrapper ── */
+
+.tp-reviews-wrapper {
+    margin: 0;
+    padding: 0;
+}
+
+/* ── Card Grid ── */
+
+.tp-reviews-grid {
+    display: grid;
+    /* auto-fill + minmax(280px, 1fr) delivers:
+       1-col on mobile (<560px), 2-col on tablet, 3-col on desktop — no media queries needed. */
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px 16px; /* row-gap column-gap */
+    margin-bottom: 24px;
+    background-color: #f9f9f9;
+    padding: 16px;
+    border-radius: 4px;
+}
+
+/* ── Review Card ── */
+
+.tp-review-card {
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, .04);
+    padding: 16px;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* ── Stars Row ── */
+
+.tp-review-stars {
+    font-size: 18px;
+    line-height: 1;
+}
+
+/* ── Review Header (author + date) ── */
+
+.tp-review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.tp-review-author {
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.4;
+    color: #1d2327;
+}
+
+.tp-review-date {
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.4;
+    color: #646970;
+    white-space: nowrap;
+}
+
+/* ── Review Title ── */
+
+.tp-review-title {
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: #1d2327;
+    margin: 0;
+}
+
+/* ── Review Body ── */
+
+.tp-review-body {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #1d2327;
+    margin: 0;
+    flex-grow: 1;
+}
+
+/* ── Verified Badge ── */
+
+.tp-review-verified {
+    display: inline-block;
+    background-color: #00b67a;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+    padding: 3px 8px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    align-self: flex-start;
+}
+
+/* ── Empty State ── */
+
+.tp-empty-state {
+    color: #646970;
+    font-style: italic;
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 24px 0;
+}
+
+/* ── Compliance Block ── */
+
+.tp-compliance-separator {
+    border: none;
+    border-top: 1px solid #e0e0e0;
+    margin: 24px 0 16px;
+}
+
+.tp-compliance-block {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 0;
+    padding: 0;
+}
+
+.tp-compliance-logo {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px; /* WCAG 2.1 AA touch target minimum */
+    text-decoration: none;
+    flex-shrink: 0;
+}
+
+.tp-compliance-logo img {
+    display: block;
+    max-width: 120px;
+    height: auto;
+}
+
+.tp-compliance-score {
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.4;
+    color: #646970;
+}
+
+.tp-compliance-disclosure {
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.4;
+    color: #646970;
+    margin: 0;
+    width: 100%;
+}
