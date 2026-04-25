@@ -44,7 +44,7 @@ class TP_Settings_Page {
     public function register_settings(): void {
         register_setting( self::OPTION_GROUP, 'tp_api_key', [
             'type'              => 'string',
-            'sanitize_callback' => 'sanitize_text_field',
+            'sanitize_callback' => [ $this, 'sanitize_api_key' ],
         ] );
 
         register_setting( self::OPTION_GROUP, 'tp_api_secret', [
@@ -90,7 +90,7 @@ class TP_Settings_Page {
      */
     public function render_api_key_field(): void {
         printf(
-            '<input type="text" id="tp_api_key" name="tp_api_key" value="%s" class="regular-text" />',
+            '<input type="password" id="tp_api_key" name="tp_api_key" value="%s" class="regular-text" autocomplete="new-password" />',
             esc_attr( get_option( 'tp_api_key', '' ) )
         );
     }
@@ -135,6 +135,23 @@ class TP_Settings_Page {
         $value = sanitize_text_field( $value );
         if ( '' === $value ) {
             return (string) get_option( 'tp_api_secret', '' );
+        }
+        return $value;
+    }
+
+    /**
+     * Sanitize the API key, preserving the existing DB value when POST is empty.
+     *
+     * Same empty-guard pattern as sanitize_api_secret() — type="password" fields
+     * are not pre-filled by browsers, so an empty POST must not overwrite the key.
+     *
+     * @param string $value Raw value from the POST submission.
+     * @return string Sanitized key, or the existing DB value if $value is empty.
+     */
+    public function sanitize_api_key( string $value ): string {
+        $value = sanitize_text_field( $value );
+        if ( '' === $value ) {
+            return (string) get_option( 'tp_api_key', '' );
         }
         return $value;
     }
