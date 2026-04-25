@@ -265,7 +265,7 @@ class TP_Preset_UI {
 
         ?>
         <div class="wrap">
-            <h1><?php esc_html_e( 'Presets', 'trustpilot-reviews' ); ?></h1>
+            <h1><?php esc_html_e( 'Dashboard', 'trustpilot-reviews' ); ?></h1>
             <?php TP_Dashboard::render_panel(); ?>
 
             <?php
