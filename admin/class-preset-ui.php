@@ -147,7 +147,15 @@ class TP_Preset_UI {
             ];
         }
 
-        update_option( 'tp_presets', wp_json_encode( $presets ) );
+        $encoded = wp_json_encode( $presets );
+        if ( false === $encoded ) {
+            wp_safe_redirect( add_query_arg(
+                [ 'page' => 'tp-presets', 'result' => 'error_invalid' ],
+                admin_url( 'admin.php' )
+            ) );
+            exit;
+        }
+        update_option( 'tp_presets', $encoded );
 
         wp_safe_redirect( add_query_arg(
             [ 'page' => 'tp-presets', 'result' => 'saved' ],
@@ -179,6 +187,7 @@ class TP_Preset_UI {
         // Per-preset nonce: tp_delete_preset_{slug} (D-06).
         check_admin_referer( "tp_delete_preset_{$slug}" );
 
+        // Capability check immediately after nonce — consistent with handle_save (security order: nonce → capability).
         if ( ! current_user_can( 'manage_options' ) ) {
             wp_die( esc_html__( 'Insufficient permissions.', 'trustpilot-reviews' ) );
         }
@@ -196,7 +205,15 @@ class TP_Preset_UI {
             return $preset['slug'] !== $slug;
         } ) );
 
-        update_option( 'tp_presets', wp_json_encode( $presets ) );
+        $encoded = wp_json_encode( $presets );
+        if ( false === $encoded ) {
+            wp_safe_redirect( add_query_arg(
+                [ 'page' => 'tp-presets', 'result' => 'error_invalid' ],
+                admin_url( 'admin.php' )
+            ) );
+            exit;
+        }
+        update_option( 'tp_presets', $encoded );
 
         wp_safe_redirect( add_query_arg(
             [ 'page' => 'tp-presets', 'result' => 'deleted' ],
