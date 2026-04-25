@@ -1,0 +1,44 @@
+/*
+ * Trustpilot Reviews — Admin Styles
+ *
+ * Namespaced with .tp- prefix to prevent collision with WordPress or other plugins.
+ * All other styling inherits from wp-admin.css.
+ *
+ * @since 1.0.0
+ */
+
+/* Status card container */
+.tp-status-card {
+    margin-top: 16px;
+    padding: 16px;
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, .04);
+}
+
+/* Status table layout */
+.tp-status-table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+/* Label column */
+.tp-status-label {
+    padding: 8px 16px 8px 0;
+    color: #646970;
+    font-size: 13px;
+    width: 200px;
+    vertical-align: top;
+}
+
+/* Value column */
+.tp-status-value {
+    padding: 8px 0;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+/* Sync Now form spacing */
+.tp-sync-form {
+    margin-top: 24px;
+}
