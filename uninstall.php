@@ -33,6 +33,7 @@ delete_option( 'tp_is_initial_sync_done' );
 delete_option( 'tp_api_key' );
 delete_option( 'tp_api_secret' );
 delete_option( 'tp_business_unit_id' );
+delete_option( 'tp_business_domain' );   // Phase 2: raw domain input (new in Phase 2)
 
 // Phase 3 — preset manager.
 delete_option( 'tp_presets' );

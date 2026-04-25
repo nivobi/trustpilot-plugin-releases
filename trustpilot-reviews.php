@@ -36,3 +36,56 @@ add_action( 'init', function() {
 	// WP-CLI activation fallback (Pitfall P3): if the table doesn't exist, create it.
 	TP_Activator::maybe_create_table();
 } );
+
+/**
+ * Admin layer — only loaded in the WordPress admin context.
+ *
+ * Registers the Trustpilot menu and sub-pages (D-01, D-02, D-03),
+ * the Settings API hooks, and the Sync Now admin-post handler.
+ */
+if ( is_admin() ) {
+	require_once TP_PLUGIN_DIR . 'admin/class-settings-page.php';
+	require_once TP_PLUGIN_DIR . 'admin/class-dashboard.php';
+
+	$tp_settings = new TP_Settings_Page();
+	$tp_settings->register_hooks();
+	TP_Dashboard::register_hooks();
+
+	add_action( 'admin_menu', function() use ( $tp_settings ) {
+		// Top-level menu item — appears in sidebar alongside Pages, Posts (D-02).
+		add_menu_page(
+			__( 'Trustpilot Reviews', 'trustpilot-reviews' ), // page_title
+			__( 'Trustpilot', 'trustpilot-reviews' ),          // menu_title
+			'manage_options',                                   // capability
+			'tp-reviews',                                       // menu_slug
+			[ $tp_settings, 'render' ],                        // callback (Settings page is default landing)
+			'dashicons-star-filled',                            // icon
+			80                                                  // position (after Settings)
+		);
+
+		// First sub-page uses SAME slug as parent — becomes default landing page (D-03, Pitfall P4).
+		$settings_hook = add_submenu_page(
+			'tp-reviews',
+			__( 'Settings', 'trustpilot-reviews' ),
+			__( 'Settings', 'trustpilot-reviews' ),
+			'manage_options',
+			'tp-reviews',                                       // SAME as parent slug (required for D-03)
+			[ $tp_settings, 'render' ]
+		);
+
+		// Second sub-page — Dashboard.
+		$dashboard_hook = add_submenu_page(
+			'tp-reviews',
+			__( 'Dashboard', 'trustpilot-reviews' ),
+			__( 'Dashboard', 'trustpilot-reviews' ),
+			'manage_options',
+			'tp-dashboard',
+			[ 'TP_Dashboard', 'render' ]
+		);
+
+		// Store hook suffixes back into the TP_Settings_Page instance so
+		// enqueue_admin_styles() can gate CSS loading to plugin pages only.
+		$tp_settings->settings_hook  = (string) $settings_hook;
+		$tp_settings->dashboard_hook = (string) $dashboard_hook;
+	} );
+}
