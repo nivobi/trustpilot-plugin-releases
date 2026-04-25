@@ -1,13 +1,14 @@
 <?php
 /**
- * Plugin Name:       Trustpilot Reviews
- * Plugin URI:        https://github.com/yourorg/trustpilot-reviews
+ * Plugin Name:       Nivobi Trustpilot Reviews
+ * Plugin URI:        https://nivobi.com
  * Description:       Syncs Trustpilot reviews to a local database via WP-Cron and serves them through a Preset Manager shortcode system.
  * Version:           1.0.0
  * Requires at least: 6.4
  * Tested up to:      6.8
  * Requires PHP:      8.1
- * Author:            Your Name
+ * Author:            nivobi
+ * Author URI:        https://nivobi.com
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       trustpilot-reviews
@@ -59,26 +60,27 @@ if ( is_admin() ) {
 	TP_Preset_UI::register_hooks();
 
 	add_action( 'admin_menu', function() use ( $tp_settings ) {
-		// Top-level menu item — appears in sidebar alongside Pages, Posts (D-02).
+		// Top-level menu item — Presets is the default landing page.
 		add_menu_page(
-			__( 'Trustpilot Reviews', 'trustpilot-reviews' ), // page_title
-			__( 'Trustpilot', 'trustpilot-reviews' ),          // menu_title
-			'manage_options',                                   // capability
-			'tp-reviews',                                       // menu_slug
-			[ $tp_settings, 'render' ],                        // callback (Settings page is default landing)
-			'dashicons-star-filled',                            // icon
-			80                                                  // position (after Settings)
+			__( 'Trustpilot Reviews', 'trustpilot-reviews' ),
+			__( 'Trustpilot', 'trustpilot-reviews' ),
+			'manage_options',
+			'tp-reviews',
+			[ 'TP_Preset_UI', 'render' ],
+			'dashicons-star-filled',
+			80
 		);
 
-		// First sub-page uses SAME slug as parent — becomes default landing page (D-03, Pitfall P4).
-		$settings_hook = add_submenu_page(
+		// First sub-page uses SAME slug as parent — becomes default landing page (Presets).
+		$presets_hook = add_submenu_page(
 			'tp-reviews',
-			__( 'Settings', 'trustpilot-reviews' ),
-			__( 'Settings', 'trustpilot-reviews' ),
+			__( 'Presets', 'trustpilot-reviews' ),
+			__( 'Presets', 'trustpilot-reviews' ),
 			'manage_options',
-			'tp-reviews',                                       // SAME as parent slug (required for D-03)
-			[ $tp_settings, 'render' ]
+			'tp-reviews',
+			[ 'TP_Preset_UI', 'render' ]
 		);
+		TP_Preset_UI::$presets_hook = (string) $presets_hook;
 
 		// Second sub-page — Dashboard.
 		$dashboard_hook = add_submenu_page(
@@ -89,23 +91,17 @@ if ( is_admin() ) {
 			'tp-dashboard',
 			[ 'TP_Dashboard', 'render' ]
 		);
-
-		// Store hook suffixes back into the TP_Settings_Page instance so
-		// enqueue_admin_styles() can gate CSS loading to plugin pages only.
-		$tp_settings->settings_hook  = (string) $settings_hook;
 		$tp_settings->dashboard_hook = (string) $dashboard_hook;
 
-		// Third sub-page — Presets (D-01, Phase 3).
-		$presets_hook = add_submenu_page(
+		// Third sub-page — Settings.
+		$settings_hook = add_submenu_page(
 			'tp-reviews',
-			__( 'Presets', 'trustpilot-reviews' ),
-			__( 'Presets', 'trustpilot-reviews' ),
+			__( 'Settings', 'trustpilot-reviews' ),
+			__( 'Settings', 'trustpilot-reviews' ),
 			'manage_options',
-			'tp-presets',
-			[ 'TP_Preset_UI', 'render' ]
+			'tp-settings',
+			[ $tp_settings, 'render' ]
 		);
-
-		// Store hook suffix into TP_Preset_UI static property for CSS enqueue gate (D-02).
-		TP_Preset_UI::$presets_hook = (string) $presets_hook;
+		$tp_settings->settings_hook = (string) $settings_hook;
 	} );
 }
