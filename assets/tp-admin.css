@@ -42,3 +42,41 @@
 .tp-sync-form {
     margin-top: 24px;
 }
+
+/* ── Phase 3: Preset Manager ── */
+
+/* Preset form card (mirrors .tp-status-card pattern) */
+.tp-preset-form-card {
+    margin-top: 24px;
+    padding: 16px;
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, .04);
+}
+
+/* Empty state paragraph in list table */
+.tp-empty-state {
+    color: #646970;
+    font-style: italic;
+    margin: 8px 0;
+}
+
+/* Read-only slug display in edit mode */
+.tp-slug-readonly {
+    display: inline-block;
+    padding: 4px 0;
+    font-weight: 600;
+    font-family: monospace;
+    color: #1d2327;
+}
+
+/* Actions cell: prevent Edit/Delete wrap */
+.tp-actions-cell {
+    white-space: nowrap;
+}
+
+/* Delete link: left margin gap from Edit link */
+.tp-actions-cell .button-link-delete {
+    margin-left: 8px;
+    color: #d63638;
+}
