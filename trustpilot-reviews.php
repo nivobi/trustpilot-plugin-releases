@@ -27,6 +27,9 @@ require_once TP_PLUGIN_DIR . 'includes/class-api-client.php';
 require_once TP_PLUGIN_DIR . 'includes/class-sync-engine.php';
 require_once TP_PLUGIN_DIR . 'includes/class-preset-manager.php';
 require_once TP_PLUGIN_DIR . 'includes/class-shortcode.php';
+require_once TP_PLUGIN_DIR . 'includes/class-rest-api.php';
+
+TP_REST_API::register_hooks();
 
 // Prevent WordPress from matching this plugin against the wp.org update API.
 // The slug "trustpilot-reviews" conflicts with a public wp.org plugin — without

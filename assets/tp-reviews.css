@@ -1,170 +1,271 @@
 /*
- * Trustpilot Reviews — Frontend Styles
- *
- * Namespaced with .tp- prefix to prevent collision with themes or other plugins.
- * Loaded only on pages that render [tp_reviews] shortcode (wp_enqueue_style inside
- * render() — flushed via wp_footer, not wp_head). Theme developers can override any
- * rule by targeting the same .tp- class with higher specificity in their theme CSS.
- *
- * @since 1.0.0
+ * Trustpilot Reviews — Frontend Shortcode Styles
+ * Matches the official Trustpilot widget aesthetic.
+ * Namespaced .tp- to prevent collision with themes/plugins.
  */
 
 /* ── Wrapper ── */
-
 .tp-reviews-wrapper {
-    margin: 0;
-    padding: 0;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	box-sizing: border-box;
+	width: 100%;
 }
 
-/* ── Card Grid ── */
-
-.tp-reviews-grid {
-    display: grid;
-    /* auto-fill + minmax(280px, 1fr) delivers:
-       1-col on mobile (<560px), 2-col on tablet, 3-col on desktop — no media queries needed. */
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 24px 16px; /* row-gap column-gap */
-    margin-bottom: 24px;
-    background-color: #f9f9f9;
-    padding: 16px;
-    border-radius: 4px;
+/* Override block-theme .is-layout-constrained constraint.
+   Theme uses !important on margins so we must too. */
+.tp-reviews-wrapper {
+	max-width: none !important;
+	margin-left: 0 !important;
+	margin-right: 0 !important;
 }
 
-/* ── Review Card ── */
+/* ── Carousel container ── */
+.tp-carousel {
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
 
+.tp-carousel-track {
+	display: flex;
+	gap: 16px;
+	overflow-x: auto;
+	scroll-snap-type: x mandatory;
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+	padding: 12px 4px;
+	flex: 1;
+	min-width: 0;
+}
+
+.tp-carousel-track::-webkit-scrollbar {
+	display: none;
+}
+
+/* ── Arrow buttons ── */
+.tp-carousel-btn {
+	flex-shrink: 0;
+	position: relative;
+	width: 24px;
+	height: 24px;
+	border: none;
+	background: transparent;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+}
+
+.tp-carousel-btn::before {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate( -50%, -50% );
+	width: 24px;
+	height: 24px;
+	border-radius: 50%;
+	background: transparent;
+	transition: width 0.15s, height 0.15s, background 0.15s;
+	z-index: 0;
+}
+
+.tp-carousel-btn svg {
+	position: relative;
+	z-index: 1;
+	flex-shrink: 0;
+	width: 24px;
+	height: 24px;
+	display: block;
+}
+
+.tp-carousel-btn:hover:not( :disabled )::before {
+	background: #c2d5f7;
+	width: 44px;
+	height: 44px;
+}
+
+.tp-carousel-btn:active:not( :disabled )::before {
+	background: #a8c4f5;
+}
+
+.tp-carousel-btn:disabled {
+	opacity: 0.2;
+	cursor: default;
+}
+
+/* ── Review card ── */
 .tp-review-card {
-    background: #ffffff;
-    border: 1px solid #e0e0e0;
-    box-shadow: 0 1px 1px rgba(0, 0, 0, .04);
-    padding: 16px;
-    border-radius: 4px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+	flex: 0 0 214px;
+	width: 214px;
+	scroll-snap-align: start;
+	background: #f8f9fa;
+	border: none;
+	border-radius: 2px;
+	box-shadow: 0 1px 0 rgba( 182, 196, 210, 0.4 );
+	padding: 15px;
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
 }
 
-/* ── Stars Row ── */
-
-.tp-review-stars {
-    font-size: 18px;
-    line-height: 1;
+/* ── Top row: stars + verified ── */
+.tp-review-top {
+	display: flex;
+	align-items: center;
+	gap: 8px;
 }
 
-/* ── Review Header (author + date) ── */
+.tp-review-stars svg {
+	display: block;
+	width: 100px;
+	height: auto;
+}
 
-.tp-review-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
+.tp-review-verified {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	font-size: 13px;
+	color: #636363;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	text-decoration: underline;
+}
+
+.tp-review-verified:hover {
+	text-decoration: none;
+	color: #636363;
+}
+
+.tp-verified-icon {
+	display: inline-flex;
+	align-items: center;
+	flex-shrink: 0;
+	width: 14px;
+	height: 14px;
+	color: #636363;
+}
+
+/* ── Review link wrapper ── */
+.tp-review-link {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	gap: 6px;
+	text-decoration: none;
+	color: inherit;
+	min-width: 0;
+}
+
+.tp-review-card:hover .tp-stars--1 .tp-star--filled .tp-star__canvas { fill: #cc1300; }
+.tp-review-card:hover .tp-stars--2 .tp-star--filled .tp-star__canvas { fill: #cc5c00; }
+.tp-review-card:hover .tp-stars--3 .tp-star--filled .tp-star__canvas { fill: #b29000; }
+.tp-review-card:hover .tp-stars--4 .tp-star--filled .tp-star__canvas { fill: #56a700; }
+.tp-review-card:hover .tp-stars--5 .tp-star--filled .tp-star__canvas { fill: #007a52; }
+.tp-review-card:hover .tp-stars--2 .tp-star--filled .tp-star__canvas--half { fill: #cc5c00; }
+.tp-review-card:hover .tp-stars--3 .tp-star--filled .tp-star__canvas--half { fill: #b29000; }
+.tp-review-card:hover .tp-stars--4 .tp-star--filled .tp-star__canvas--half { fill: #56a700; }
+.tp-review-card:hover .tp-stars--5 .tp-star--filled .tp-star__canvas--half { fill: #007a52; }
+
+/* ── Title ── */
+.tp-review-title {
+	font-size: 14px;
+	font-weight: 700;
+	color: #1a1a1a;
+	margin: 0 0 6px;
+	line-height: 16px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+/* ── Body ── */
+.tp-review-body {
+	font-size: 13px;
+	color: #555;
+	margin: 0;
+	line-height: 16px;
+	flex: 1;
+	overflow: hidden;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+}
+
+/* ── Footer: author + date ── */
+.tp-review-footer {
+	font-size: 13px;
+	color: #636363;
+	margin-top: auto;
+	padding-top: 20px;
+	display: flex;
+	overflow: hidden;
 }
 
 .tp-review-author {
-    font-size: 13px;
-    font-weight: 400;
-    line-height: 1.4;
-    color: #1d2327;
+	font-weight: 700;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	flex-shrink: 1;
 }
 
 .tp-review-date {
-    font-size: 13px;
-    font-weight: 400;
-    line-height: 1.4;
-    color: #646970;
-    white-space: nowrap;
+	white-space: nowrap;
+	flex-shrink: 0;
+	margin-left: 3px;
 }
 
-/* ── Review Title ── */
-
-.tp-review-title {
-    font-size: 15px;
-    font-weight: 600;
-    line-height: 1.3;
-    color: #1d2327;
-    margin: 0;
-}
-
-/* ── Review Body ── */
-
-.tp-review-body {
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 1.5;
-    color: #1d2327;
-    margin: 0;
-    flex-grow: 1;
-}
-
-/* ── Verified Badge ── */
-
-.tp-review-verified {
-    display: inline-block;
-    background-color: #00b67a;
-    color: #ffffff;
-    font-size: 11px;
-    font-weight: 600;
-    line-height: 1;
-    padding: 3px 8px;
-    border-radius: 3px;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    align-self: flex-start;
-}
-
-/* ── Empty State ── */
-
-.tp-empty-state {
-    color: #646970;
-    font-style: italic;
-    grid-column: 1 / -1;
-    text-align: center;
-    padding: 24px 0;
-}
-
-/* ── Compliance Block ── */
-
-.tp-compliance-separator {
-    border: none;
-    border-top: 1px solid #e0e0e0;
-    margin: 24px 0 16px;
-}
-
+/* ── Compliance block ── */
 .tp-compliance-block {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 16px;
-    margin-top: 0;
-    padding: 0;
+	text-align: center;
+	padding: 10px 0 2px;
+	font-size: 13px;
+	color: #444;
 }
 
-.tp-compliance-logo {
-    display: inline-flex;
-    align-items: center;
-    min-height: 44px; /* WCAG 2.1 AA touch target minimum */
-    text-decoration: none;
-    flex-shrink: 0;
+.tp-compliance-text {
+	margin: 0 0 8px;
+	line-height: 1.5;
 }
 
-.tp-compliance-logo img {
-    display: block;
-    max-width: 120px;
-    height: auto;
+.tp-compliance-text a {
+	color: #333;
 }
 
-.tp-compliance-score {
-    font-size: 13px;
-    font-weight: 400;
-    line-height: 1.4;
-    color: #646970;
+.tp-compliance-logo-link {
+	display: inline-block;
 }
 
-.tp-compliance-disclosure {
-    font-size: 13px;
-    font-weight: 400;
-    line-height: 1.4;
-    color: #646970;
-    margin: 0;
-    width: 100%;
+.tp-compliance-logo-link svg {
+	display: block;
+	margin: 0 auto;
+	height: 20px;
+	width: auto;
+}
+
+/* ── Empty state ── */
+.tp-no-reviews {
+	padding: 24px;
+	color: #777;
+	font-style: italic;
+	text-align: center;
+}
+
+/* Cards stay fixed-width; carousel scrolls on small screens */
+@media ( max-width: 480px ) {
+	.tp-review-card {
+		flex: 0 0 160px;
+		width: 160px;
+	}
+	.tp-carousel-btn {
+		width: 24px;
+		height: 24px;
+		font-size: 14px;
+	}
 }

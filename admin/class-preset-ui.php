@@ -201,10 +201,11 @@ class TP_Preset_UI {
     }
 
     /**
-     * Enqueue preset admin CSS — gated to Presets page only (D-13).
+     * Enqueue React admin app — gated to Dashboard page only.
      *
-     * Hook suffix is stored by bootstrap wiring in self::$presets_hook after
-     * add_submenu_page() returns (03-02 plan).
+     * Loads the @wordpress/scripts build output (assets/build/index.js) which
+     * depends on wp-element, wp-components, and wp-api-fetch. The generated
+     * index.asset.php supplies the dependency array and content-hash version.
      *
      * @param string $hook Current admin page hook suffix.
      */
@@ -212,246 +213,56 @@ class TP_Preset_UI {
         if ( empty( self::$presets_hook ) || $hook !== self::$presets_hook ) {
             return;
         }
+
+        $asset_file = TP_PLUGIN_DIR . 'assets/build/index.asset.php';
+        if ( ! file_exists( $asset_file ) ) {
+            return;
+        }
+
+        $asset = include $asset_file;
+
+        wp_enqueue_script(
+            'tp-admin-app',
+            plugin_dir_url( TP_PLUGIN_FILE ) . 'assets/build/index.js',
+            $asset['dependencies'],
+            $asset['version'],
+            true
+        );
+
         wp_enqueue_style(
-            'tp-admin',
-            plugin_dir_url( TP_PLUGIN_FILE ) . 'assets/tp-admin.css',
-            [],
-            TP_PLUGIN_VERSION
+            'tp-admin-app',
+            plugin_dir_url( TP_PLUGIN_FILE ) . 'assets/build/style-index.css',
+            [ 'wp-components' ],
+            $asset['version']
+        );
+
+        // Wire the REST nonce into @wordpress/api-fetch before the app boots.
+        wp_add_inline_script(
+            'tp-admin-app',
+            sprintf(
+                'wp.apiFetch.use( wp.apiFetch.createNonceMiddleware( %s ) );',
+                wp_json_encode( wp_create_nonce( 'wp_rest' ) )
+            ),
+            'before'
         );
     }
 
     /**
-     * Render the Presets admin page.
-     *
-     * Outputs: capability gate → admin notices → list table → add/edit form.
-     * Pre-fills form when ?action=edit&preset={slug} is present.
-     *
-     * @return void
+     * Render the Dashboard page — React app mounts into #tp-admin-root.
      */
     public static function render(): void {
         if ( ! current_user_can( 'manage_options' ) ) {
             return;
         }
-
-        // Load presets via shared Preset Manager (D-10).
-        $presets = TP_Preset_Manager::get_all();
-
-        // Detect edit mode: ?action=edit&preset={slug}
-        // phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only display, no state change.
-        $edit_mode    = isset( $_GET['action'] ) && 'edit' === $_GET['action']
-                        && isset( $_GET['preset'] ) && ! empty( $_GET['preset'] );
-        $editing_slug = $edit_mode ? sanitize_title( wp_unslash( $_GET['preset'] ) ) : '';
-        // phpcs:enable WordPress.Security.NonceVerification.Recommended
-
-        // Find preset being edited (if any).
-        $edit_preset  = null;
-        if ( $edit_mode ) {
-            foreach ( $presets as $preset ) {
-                if ( $preset['slug'] === $editing_slug ) {
-                    $edit_preset = $preset;
-                    break;
-                }
-            }
-            // If slug in URL no longer exists, fall back to create mode.
-            if ( null === $edit_preset ) {
-                $edit_mode    = false;
-                $editing_slug = '';
-            }
-        }
-
-        // Detect admin notice from ?result= query arg.
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-        $result = isset( $_GET['result'] ) ? sanitize_key( $_GET['result'] ) : '';
-
         ?>
         <div class="wrap">
-            <h1><?php esc_html_e( 'Dashboard', 'trustpilot-reviews' ); ?></h1>
-            <?php TP_Dashboard::render_panel(); ?>
-
-            <?php
-            // Admin notices (UI-SPEC: Admin Notices table).
-            if ( 'saved' === $result ) : ?>
-                <div class="notice notice-success is-dismissible">
-                    <p><?php esc_html_e( 'Preset saved successfully.', 'trustpilot-reviews' ); ?></p>
-                </div>
-            <?php elseif ( 'deleted' === $result ) : ?>
-                <div class="notice notice-success is-dismissible">
-                    <p><?php esc_html_e( 'Preset deleted.', 'trustpilot-reviews' ); ?></p>
-                </div>
-            <?php elseif ( 'error_slug_exists' === $result ) : ?>
-                <div class="notice notice-error">
-                    <p><?php esc_html_e( 'A preset with that slug already exists. Choose a different slug.', 'trustpilot-reviews' ); ?></p>
-                </div>
-            <?php elseif ( 'error_invalid' === $result ) : ?>
-                <div class="notice notice-error">
-                    <p><?php esc_html_e( 'Could not save preset. Check all fields and try again.', 'trustpilot-reviews' ); ?></p>
-                </div>
-            <?php endif; ?>
-
-            <?php /* ── List Table (D-07, UI-SPEC) ── */ ?>
-            <table class="wp-list-table widefat fixed striped">
-                <thead>
-                    <tr>
-                        <th style="width:20%"><?php esc_html_e( 'Slug', 'trustpilot-reviews' ); ?></th>
-                        <th style="width:40%"><?php esc_html_e( 'Keywords', 'trustpilot-reviews' ); ?></th>
-                        <th style="width:12%"><?php esc_html_e( 'Min Stars', 'trustpilot-reviews' ); ?></th>
-                        <th style="width:10%"><?php esc_html_e( 'Limit', 'trustpilot-reviews' ); ?></th>
-                        <th style="width:18%"><?php esc_html_e( 'Actions', 'trustpilot-reviews' ); ?></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if ( empty( $presets ) ) : ?>
-                        <tr>
-                            <td colspan="5">
-                                <p class="tp-empty-state"><?php esc_html_e( 'No presets yet. Use the form below to create one.', 'trustpilot-reviews' ); ?></p>
-                            </td>
-                        </tr>
-                    <?php else : ?>
-                        <?php foreach ( $presets as $preset ) : ?>
-                            <tr>
-                                <td><?php echo esc_html( $preset['slug'] ); ?></td>
-                                <td><?php echo esc_html( $preset['keywords'] ); ?></td>
-                                <td><?php echo esc_html( (string) $preset['min_stars'] ); ?></td>
-                                <td><?php echo esc_html( (string) $preset['limit'] ); ?></td>
-                                <td class="tp-actions-cell">
-                                    <a href="<?php echo esc_url( add_query_arg( [
-                                        'page'   => 'tp-reviews',
-                                        'action' => 'edit',
-                                        'preset' => $preset['slug'],
-                                    ], admin_url( 'admin.php' ) ) ); ?>"><?php esc_html_e( 'Edit', 'trustpilot-reviews' ); ?></a>
-                                    <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="display:inline;">
-                                        <input type="hidden" name="action"      value="tp_delete_preset">
-                                        <input type="hidden" name="preset_slug" value="<?php echo esc_attr( $preset['slug'] ); ?>">
-                                        <?php wp_nonce_field( "tp_delete_preset_{$preset['slug']}" ); ?>
-                                        <button type="submit" class="button-link button-link-delete"><?php esc_html_e( 'Delete', 'trustpilot-reviews' ); ?></button>
-                                    </form>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-
-            <?php /* ── Add / Edit Form (D-03, UI-SPEC) ── */ ?>
-            <div class="tp-preset-form-card">
-                <?php if ( $edit_mode && null !== $edit_preset ) : ?>
-                    <h2><?php printf(
-                        /* translators: %s: preset slug */
-                        esc_html__( 'Edit Preset: %s', 'trustpilot-reviews' ),
-                        esc_html( $edit_preset['slug'] )
-                    ); ?></h2>
-                    <div class="notice notice-info inline">
-                        <p><?php esc_html_e( 'Slug cannot be changed after creation — doing so would break deployed shortcodes.', 'trustpilot-reviews' ); ?></p>
-                    </div>
-                <?php else : ?>
-                    <h2><?php esc_html_e( 'Add Preset', 'trustpilot-reviews' ); ?></h2>
-                <?php endif; ?>
-
-                <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-                    <input type="hidden" name="action" value="tp_save_preset">
-                    <?php wp_nonce_field( 'tp_save_preset' ); ?>
-
-                    <?php if ( $edit_mode && null !== $edit_preset ) : ?>
-                        <?php /* Edit mode: slug is read-only; original slug passed as hidden field (D-09). */ ?>
-                        <input type="hidden" name="preset_original_slug" value="<?php echo esc_attr( $edit_preset['slug'] ); ?>">
-                    <?php endif; ?>
-
-                    <table class="form-table" role="presentation">
-                        <tbody>
-                            <tr>
-                                <th scope="row">
-                                    <label for="tp_slug"><?php esc_html_e( 'Slug', 'trustpilot-reviews' ); ?></label>
-                                </th>
-                                <td>
-                                    <?php if ( $edit_mode && null !== $edit_preset ) : ?>
-                                        <span class="tp-slug-readonly"><?php echo esc_html( $edit_preset['slug'] ); ?></span>
-                                    <?php else : ?>
-                                        <input
-                                            name="tp_slug"
-                                            id="tp_slug"
-                                            type="text"
-                                            class="regular-text"
-                                            required
-                                            pattern="[a-z0-9\-]+"
-                                            maxlength="100"
-                                            value="">
-                                        <p class="description"><?php esc_html_e( 'Unique identifier used in the shortcode: [tp_reviews id="your-slug"]. Lowercase, numbers, and hyphens only.', 'trustpilot-reviews' ); ?></p>
-                                    <?php endif; ?>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row">
-                                    <label for="tp_keywords"><?php esc_html_e( 'Keywords', 'trustpilot-reviews' ); ?></label>
-                                </th>
-                                <td>
-                                    <input
-                                        name="tp_keywords"
-                                        id="tp_keywords"
-                                        type="text"
-                                        class="regular-text"
-                                        placeholder="<?php esc_attr_e( 'e.g. excellent, fast delivery, great service', 'trustpilot-reviews' ); ?>"
-                                        value="<?php echo esc_attr( $edit_mode && null !== $edit_preset ? $edit_preset['keywords'] : '' ); ?>">
-                                    <p class="description"><?php esc_html_e( 'Comma-separated list. A review matches if its text contains any of these words. Leave blank to match all reviews.', 'trustpilot-reviews' ); ?></p>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row">
-                                    <label for="tp_min_stars"><?php esc_html_e( 'Min Stars', 'trustpilot-reviews' ); ?></label>
-                                </th>
-                                <td>
-                                    <select name="tp_min_stars" id="tp_min_stars">
-                                        <?php
-                                        $saved_stars = $edit_mode && null !== $edit_preset ? (int) $edit_preset['min_stars'] : 1;
-                                        $star_options = [
-                                            1 => __( '1 Star (any rating)', 'trustpilot-reviews' ),
-                                            2 => __( '2 Stars', 'trustpilot-reviews' ),
-                                            3 => __( '3 Stars', 'trustpilot-reviews' ),
-                                            4 => __( '4 Stars', 'trustpilot-reviews' ),
-                                            5 => __( '5 Stars only', 'trustpilot-reviews' ),
-                                        ];
-                                        foreach ( $star_options as $val => $label ) :
-                                            printf(
-                                                '<option value="%d"%s>%s</option>',
-                                                $val,
-                                                selected( $saved_stars, $val, false ),
-                                                esc_html( $label )
-                                            );
-                                        endforeach;
-                                        ?>
-                                    </select>
-                                    <p class="description"><?php esc_html_e( 'Only include reviews with this star rating or higher. Select 1 to include all star ratings.', 'trustpilot-reviews' ); ?></p>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row">
-                                    <label for="tp_limit"><?php esc_html_e( 'Limit', 'trustpilot-reviews' ); ?></label>
-                                </th>
-                                <td>
-                                    <input
-                                        name="tp_limit"
-                                        id="tp_limit"
-                                        type="number"
-                                        class="small-text"
-                                        min="1"
-                                        max="100"
-                                        required
-                                        value="<?php echo esc_attr( (string) ( $edit_mode && null !== $edit_preset ? $edit_preset['limit'] : 10 ) ); ?>">
-                                    <p class="description"><?php esc_html_e( 'Maximum number of reviews to return for this preset. Between 1 and 100.', 'trustpilot-reviews' ); ?></p>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    <?php
-                    if ( $edit_mode ) {
-                        submit_button( __( 'Update Preset', 'trustpilot-reviews' ), 'primary', 'submit', true );
-                    } else {
-                        submit_button( __( 'Add Preset', 'trustpilot-reviews' ), 'primary', 'submit', true );
-                    }
-                    ?>
-                </form>
-            </div><!-- .tp-preset-form-card -->
-        </div><!-- .wrap -->
+            <h1><?php esc_html_e( 'Trustpilot Reviews', 'trustpilot-reviews' ); ?></h1>
+            <div id="tp-admin-root">
+                <noscript>
+                    <p><?php esc_html_e( 'This admin dashboard requires JavaScript.', 'trustpilot-reviews' ); ?></p>
+                </noscript>
+            </div>
+        </div>
         <?php
     }
 }

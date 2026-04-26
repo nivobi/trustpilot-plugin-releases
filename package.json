@@ -1,0 +1,11 @@
+{
+  "name": "trustpilot-reviews",
+  "private": true,
+  "scripts": {
+    "build": "wp-scripts build --output-path=assets/build",
+    "start": "wp-scripts start --output-path=assets/build"
+  },
+  "devDependencies": {
+    "@wordpress/scripts": "^30.0.0"
+  }
+}

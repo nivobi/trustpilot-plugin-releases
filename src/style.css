@@ -1,0 +1,673 @@
+/* Trustpilot Admin App */
+
+:root {
+	--tp-green: #00b67a;
+	--tp-green-dark: #00845a;
+	--tp-border: #c3c4c7;
+	--tp-bg: #f0f0f1;
+	--tp-card: #ffffff;
+	--tp-text: #1d2327;
+	--tp-muted: #646970;
+	--tp-radius: 4px;
+	--tp-shadow: 0 1px 3px rgba( 0, 0, 0, 0.08 );
+}
+
+/* ── Layout ── */
+
+.tp-app-loading {
+	display: flex;
+	justify-content: center;
+	padding: 48px;
+}
+
+.tp-app {
+	max-width: 1100px;
+	padding-top: 8px;
+}
+
+/* ── Panel (shared card) ── */
+
+.tp-panel {
+	background: var( --tp-card );
+	border: 1px solid var( --tp-border );
+	border-radius: var( --tp-radius );
+	box-shadow: var( --tp-shadow );
+	padding: 24px;
+	margin-bottom: 24px;
+}
+
+.tp-panel__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 20px;
+}
+
+.tp-panel__title {
+	font-size: 15px;
+	font-weight: 600;
+	color: var( --tp-text );
+	margin: 0;
+	padding: 0;
+	border: none;
+}
+
+.tp-panel__actions {
+	margin-top: 20px;
+}
+
+/* ── Stat cards ── */
+
+.tp-stats-grid {
+	display: grid;
+	grid-template-columns: repeat( 4, 1fr );
+	gap: 16px;
+	margin-bottom: 16px;
+}
+
+.tp-stat-card__sub {
+	display: block;
+	font-size: 10px;
+	margin-top: 2px;
+	color: #a0a0a0;
+}
+
+.tp-stat-card {
+	background: var( --tp-bg );
+	border: 1px solid var( --tp-border );
+	border-radius: var( --tp-radius );
+	padding: 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.tp-stat-card__value {
+	font-size: 30px;
+	font-weight: 700;
+	color: var( --tp-text );
+	line-height: 1;
+}
+
+.tp-stat-card__value--date {
+	font-size: 16px;
+	font-weight: 600;
+	line-height: 1.4;
+}
+
+.tp-stat-card__label {
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	color: var( --tp-muted );
+	font-weight: 500;
+}
+
+/* ── Sync button ── */
+
+.tp-sync-btn.components-button {
+	background: var( --tp-green );
+	border-color: var( --tp-green );
+	color: #fff;
+	box-shadow: none;
+	font-weight: 500;
+	padding: 0 16px;
+	height: 36px;
+}
+
+.tp-sync-btn.components-button:hover:not( :disabled ) {
+	background: var( --tp-green-dark );
+	border-color: var( --tp-green-dark );
+	color: #fff;
+}
+
+.tp-sync-btn.components-button:disabled {
+	opacity: 0.7;
+	cursor: not-allowed;
+}
+
+/* Progress bar */
+.tp-sync-progress {
+	margin: 16px 0 4px;
+}
+
+.tp-progress-header {
+	display: flex;
+	justify-content: space-between;
+	font-size: 13px;
+	color: var( --tp-text );
+	margin-bottom: 6px;
+}
+
+.tp-progress-pct {
+	font-weight: 600;
+	color: var( --tp-green );
+}
+
+.tp-progress-track {
+	height: 8px;
+	background: var( --tp-bg );
+	border: 1px solid var( --tp-border );
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.tp-progress-fill {
+	height: 100%;
+	background: var( --tp-green );
+	border-radius: 4px;
+	transition: width 0.4s ease;
+}
+
+.tp-progress-fill--active {
+	background: repeating-linear-gradient(
+		-45deg,
+		var( --tp-green ),
+		var( --tp-green ) 10px,
+		var( --tp-green-dark ) 10px,
+		var( --tp-green-dark ) 20px
+	);
+	background-size: 28px 28px;
+	animation: tp-stripe 0.8s linear infinite;
+}
+
+@keyframes tp-stripe {
+	from { background-position: 0 0; }
+	to   { background-position: 28px 0; }
+}
+
+/* Full sync button (secondary, muted) */
+.tp-panel__actions {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	flex-wrap: wrap;
+}
+
+.tp-full-sync-btn {
+	background: none;
+	border: 1px solid var( --tp-border );
+	border-radius: 3px;
+	padding: 0 12px;
+	height: 36px;
+	font-size: 13px;
+	font-weight: 500;
+	color: var( --tp-muted );
+	cursor: pointer;
+	transition: border-color 0.15s, color 0.15s;
+}
+
+.tp-full-sync-btn:hover:not( :disabled ) {
+	border-color: #646970;
+	color: var( --tp-text );
+}
+
+.tp-full-sync-btn:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+/* ── Notices ── */
+
+.tp-notice {
+	margin: 12px 0 0 !important;
+}
+
+/* ── Presets table ── */
+
+.tp-panel--presets .tp-panel__header {
+	margin-bottom: 16px;
+}
+
+.tp-presets-table {
+	margin: 0;
+}
+
+.tp-code {
+	background: #f6f7f7;
+	border: 1px solid #dcdcde;
+	border-radius: 3px;
+	padding: 2px 6px;
+	font-size: 12px;
+	color: var( --tp-text );
+	white-space: nowrap;
+}
+
+.tp-keywords-cell {
+	max-width: 220px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.tp-muted {
+	color: var( --tp-muted );
+}
+
+/* Stars in table */
+.tp-stars {
+	display: inline-flex;
+	gap: 1px;
+}
+
+.tp-star {
+	font-size: 15px;
+	color: #dcdcde;
+	line-height: 1;
+}
+
+.tp-star--filled {
+	color: var( --tp-green );
+}
+
+/* Override wp-list-table th blue link colour */
+.tp-presets-table th {
+	color: var( --tp-text ) !important;
+}
+
+/* Shortcode cell */
+.tp-shortcode-cell {
+	max-width: 280px;
+}
+
+.tp-shortcode-cell-inner {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	min-width: 0;
+}
+
+.tp-shortcode-cell .tp-code {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	min-width: 0;
+	flex: 1;
+}
+
+.tp-copy-btn {
+	background: none;
+	border: 1px solid var( --tp-border );
+	border-radius: 3px;
+	padding: 1px 7px;
+	font-size: 11px;
+	font-weight: 500;
+	color: var( --tp-muted );
+	cursor: pointer;
+	transition: border-color 0.15s, color 0.15s, background 0.15s;
+	letter-spacing: 0.3px;
+}
+
+.tp-copy-btn:hover {
+	border-color: var( --tp-green );
+	color: var( --tp-green );
+}
+
+.tp-copy-btn--done {
+	border-color: var( --tp-green );
+	background: #e6f9f2;
+	color: var( --tp-green );
+}
+
+/* Actions: compact link-style row buttons */
+.tp-actions-cell {
+	display: flex;
+	gap: 12px;
+	align-items: center;
+	white-space: nowrap;
+}
+
+.tp-row-action {
+	background: none;
+	border: none;
+	padding: 0;
+	cursor: pointer;
+	font-size: 13px;
+	font-weight: 500;
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+
+.tp-row-action--edit {
+	color: #2271b1;
+}
+
+.tp-row-action--edit:hover {
+	color: #135e96;
+}
+
+.tp-row-action--delete {
+	color: #d63638;
+}
+
+.tp-row-action--delete:hover {
+	color: #a12626;
+}
+
+/* ── Empty state ── */
+
+.tp-empty-state {
+	text-align: center;
+	padding: 40px 24px;
+	color: var( --tp-muted );
+	border: 2px dashed var( --tp-border );
+	border-radius: var( --tp-radius );
+}
+
+.tp-empty-state p {
+	margin: 0;
+	font-size: 14px;
+}
+
+/* ── Modals ── */
+
+.tp-preset-modal .components-modal__content,
+.tp-delete-modal .components-modal__content {
+	min-width: 460px;
+}
+
+.tp-form-field {
+	margin-bottom: 16px;
+}
+
+.tp-form-label {
+	display: block;
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	color: var( --tp-text );
+	margin-bottom: 8px;
+}
+
+.tp-slug-readonly {
+	display: inline-block;
+	background: #f6f7f7;
+	border: 1px solid #dcdcde;
+	border-radius: 3px;
+	padding: 4px 8px;
+	font-family: monospace;
+	font-size: 13px;
+	font-weight: 600;
+}
+
+/* Star picker */
+.tp-star-picker {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+}
+
+.tp-star-btn {
+	background: none;
+	border: none;
+	padding: 2px 3px;
+	cursor: pointer;
+	font-size: 26px;
+	color: #dcdcde;
+	line-height: 1;
+	transition: color 0.1s, transform 0.1s;
+}
+
+.tp-star-btn--active {
+	color: var( --tp-green );
+}
+
+.tp-star-btn:hover {
+	transform: scale( 1.15 );
+}
+
+.tp-star-picker__label {
+	margin-left: 10px;
+	font-size: 13px;
+	color: var( --tp-muted );
+	min-width: 80px;
+}
+
+/* Matched count cell */
+.tp-matched-cell {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	align-items: flex-start;
+}
+
+.tp-count-badge {
+	display: inline-block;
+	background: #e6f9f2;
+	border: 1px solid #9de5c9;
+	border-radius: 10px;
+	padding: 1px 8px;
+	font-size: 11px;
+	font-weight: 600;
+	color: #006b47;
+}
+
+.tp-count-badge--loading {
+	background: var( --tp-bg );
+	border-color: var( --tp-border );
+	color: var( --tp-muted );
+}
+
+.tp-row-action--preview {
+	color: var( --tp-green );
+	font-size: 12px;
+}
+
+.tp-row-action--preview:hover {
+	color: var( --tp-green-dark );
+}
+
+/* Preview modal */
+.tp-preview-modal .components-modal__content {
+	min-width: 560px;
+	max-width: 680px;
+}
+
+.tp-preview-loading {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 24px 0;
+	color: var( --tp-muted );
+}
+
+.tp-preview-meta {
+	font-size: 13px;
+	color: var( --tp-muted );
+	margin: 0 0 16px;
+}
+
+.tp-review-list {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	max-height: 520px;
+	overflow-y: auto;
+	padding-right: 4px;
+}
+
+.tp-review-card {
+	background: var( --tp-bg );
+	border: 1px solid var( --tp-border );
+	border-radius: var( --tp-radius );
+	padding: 14px 16px;
+}
+
+.tp-review-card__header {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	margin-bottom: 8px;
+}
+
+.tp-avatar {
+	width: 34px;
+	height: 34px;
+	border-radius: 50%;
+	background: var( --tp-green );
+	color: #fff;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 14px;
+	font-weight: 700;
+	flex-shrink: 0;
+}
+
+.tp-review-card__meta {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.tp-review-card__author {
+	font-size: 13px;
+	color: var( --tp-text );
+}
+
+.tp-review-card__date {
+	font-size: 11px;
+	color: var( --tp-muted );
+	margin-left: auto;
+	white-space: nowrap;
+}
+
+.tp-review-card__title {
+	font-size: 13px;
+	font-weight: 600;
+	color: var( --tp-text );
+	margin-bottom: 4px;
+}
+
+.tp-review-card__body {
+	font-size: 13px;
+	color: var( --tp-muted );
+	margin: 0;
+	line-height: 1.5;
+}
+
+/* Slug preview (below Name field in modal) */
+.tp-slug-preview {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	background: var( --tp-bg );
+	border: 1px solid var( --tp-border );
+	border-radius: var( --tp-radius );
+	padding: 8px 12px;
+	margin-bottom: 16px;
+	flex-wrap: wrap;
+}
+
+.tp-slug-preview__label {
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	color: var( --tp-muted );
+	flex-shrink: 0;
+}
+
+.tp-slug-preview__value {
+	background: none;
+	border: none;
+	padding: 0;
+	font-family: monospace;
+	font-size: 13px;
+	font-weight: 600;
+	color: var( --tp-text );
+	flex: 1;
+}
+
+.tp-slug-preview__note {
+	font-size: 11px;
+	color: var( --tp-muted );
+	flex-basis: 100%;
+	margin-top: 2px;
+}
+
+/* Keyword chip input */
+.tp-keyword-input {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	align-items: center;
+	padding: 6px 8px;
+	border: 1px solid #949494;
+	border-radius: 4px;
+	min-height: 40px;
+	background: #fff;
+	cursor: text;
+	transition: border-color 0.15s;
+}
+
+.tp-keyword-input:focus-within {
+	border-color: var( --tp-green );
+	box-shadow: 0 0 0 1px var( --tp-green );
+}
+
+.tp-keyword-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	background: #e6f9f2;
+	border: 1px solid #9de5c9;
+	border-radius: 12px;
+	padding: 3px 8px 3px 10px;
+	font-size: 12px;
+	color: #006b47;
+	font-weight: 500;
+	line-height: 1.4;
+}
+
+/* Smaller chips in table cells */
+.tp-keyword-chip--sm {
+	padding: 1px 7px 1px 8px;
+	font-size: 11px;
+	margin: 1px;
+}
+
+.tp-chip-remove {
+	background: none;
+	border: none;
+	padding: 0 0 0 2px;
+	cursor: pointer;
+	font-size: 15px;
+	color: #00845a;
+	line-height: 1;
+	opacity: 0.6;
+	transition: opacity 0.1s;
+}
+
+.tp-chip-remove:hover {
+	opacity: 1;
+}
+
+.tp-keyword-field {
+	border: none;
+	outline: none;
+	background: transparent;
+	font-size: 13px;
+	min-width: 140px;
+	flex: 1;
+	padding: 2px 0;
+	color: var( --tp-text );
+}
+
+/* Dim slug code in table (secondary info) */
+.tp-code--muted {
+	opacity: 0.6;
+	font-size: 11px;
+}
+
+/* Modal footer */
+.tp-modal-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+	margin-top: 24px;
+	padding-top: 16px;
+	border-top: 1px solid var( --tp-border );
+}

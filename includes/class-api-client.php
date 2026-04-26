@@ -57,6 +57,18 @@ class TP_API_Client {
 	private string $business_unit_id;
 
 	/**
+	 * Cached OAuth2 token for the lifetime of this instance.
+	 *
+	 * get_all_reviews() may call get_reviews() 78+ times for large accounts.
+	 * Fetching a new token per page multiplies token-request overhead by the
+	 * page count. The token is valid for 1 hour — safe to reuse within one
+	 * sync run (a single TP_API_Client instance).
+	 *
+	 * @var string|null
+	 */
+	private ?string $cached_token = null;
+
+	/**
 	 * Constructor — reads credentials from wp_options.
 	 *
 	 * Credentials are stored server-side only; never output to the browser.
@@ -77,6 +89,11 @@ class TP_API_Client {
 	 * @return string|WP_Error Bearer token string on success, WP_Error on failure.
 	 */
 	public function get_access_token(): string|WP_Error {
+		// Return cached token if already fetched this instance lifetime.
+		if ( null !== $this->cached_token ) {
+			return $this->cached_token;
+		}
+
 		// Basic auth: base64-encode "client_id:client_secret" — T-02-01, T-02-02.
 		$credentials = base64_encode( $this->api_key . ':' . $this->api_secret );
 
@@ -108,7 +125,8 @@ class TP_API_Client {
 		}
 
 		// SECURITY: $credentials and $body['access_token'] are NEVER passed to error_log().
-		return $body['access_token'];
+		$this->cached_token = $body['access_token'];
+		return $this->cached_token;
 	}
 
 	/**
@@ -152,7 +170,7 @@ class TP_API_Client {
 
 		$body = json_decode( wp_remote_retrieve_body( $response ), true );
 
-		// Extract profile URL from links array — find the entry where rel == 'profileUrl'.
+		// Extract profile URL — try links array first, then webUrl, then construct from name.
 		$profile_url = '';
 		if ( ! empty( $body['links'] ) && is_array( $body['links'] ) ) {
 			foreach ( $body['links'] as $link ) {
@@ -161,6 +179,17 @@ class TP_API_Client {
 					break;
 				}
 			}
+		}
+		// Fallback: name.referring can be a string or array.
+		if ( empty( $profile_url ) && ! empty( $body['name']['referring'] ) ) {
+			$referring   = is_array( $body['name']['referring'] )
+				? (string) reset( $body['name']['referring'] )
+				: (string) $body['name']['referring'];
+			$profile_url = 'https://www.trustpilot.com/review/' . rawurlencode( $referring );
+		}
+		// Ensure absolute URL (API sometimes returns protocol-relative //trustpilot.com/...).
+		if ( ! empty( $profile_url ) && str_starts_with( $profile_url, '//' ) ) {
+			$profile_url = 'https:' . $profile_url;
 		}
 
 		return [
@@ -171,34 +200,23 @@ class TP_API_Client {
 	}
 
 	/**
-	 * Fetches a single page of reviews using OAuth2 Bearer token.
+	 * Fetches one page of reviews from the /all-reviews cursor-based endpoint.
 	 *
-	 * OAuth2 Bearer token is required for the reviews endpoint regardless of
-	 * account tier (D-06, Pitfall P1). Token is obtained fresh from
-	 * get_access_token() on every call (D-03 — no caching).
+	 * Uses the /all-reviews endpoint which supports pageToken pagination — the
+	 * only reliable way to walk all 7,000+ reviews without hitting plan limits.
+	 * Reviews are returned newest-first (createdat.desc) so the sync engine can
+	 * stop as soon as it encounters a review that already exists in the DB.
 	 *
-	 * The $since_date parameter enables incremental sync (D-01): pass the
-	 * ISO 8601 timestamp of the last successful sync to fetch only new reviews.
-	 * The Sync Engine converts returned published_at values from ISO 8601 to
-	 * MySQL DATETIME before the DB upsert.
+	 * Sanitizes all API response fields at the boundary (T-02-03).
 	 *
-	 * All API response fields are sanitized at the boundary (T-02-03):
-	 * - Strings: sanitize_text_field()
-	 * - Review body: wp_kses_post() (preserves basic formatting tags)
-	 * - Integers: (int) cast
-	 * - Raw JSON: wp_json_encode()
-	 *
-	 * @param int    $page       Page number (1-based). Default 1.
-	 * @param string $since_date ISO 8601 date string or '' for all reviews.
-	 *
-	 * @return array|WP_Error Associative array on success:
+	 * @param string|null $page_token Cursor token from a previous response, or null for the first page.
+	 * @return array|WP_Error On success:
 	 *   [
-	 *     'reviews'     => array,  // flat array of sanitized review items
-	 *     'total_pages' => int,    // total pages available
+	 *     'reviews'         => array,       // sanitized review items for this page
+	 *     'next_page_token' => string|null, // null when no more pages
 	 *   ]
-	 *   WP_Error on failure.
 	 */
-	public function get_reviews( int $page = 1, string $since_date = '' ): array|WP_Error {
+	public function get_reviews_page( ?string $page_token = null ): array|WP_Error {
 		$token = $this->get_access_token();
 		if ( is_wp_error( $token ) ) {
 			return $token;
@@ -206,18 +224,16 @@ class TP_API_Client {
 
 		$query_args = [
 			'perPage' => 100,
-			'page'    => $page,
-			'orderBy' => 'createdat.asc',
+			'orderBy' => 'createdat.desc',
 		];
 
-		// D-01: Incremental sync — pass startDateTime when fetching since last sync.
-		if ( ! empty( $since_date ) ) {
-			$query_args['startDateTime'] = $since_date;
+		if ( null !== $page_token ) {
+			$query_args['pageToken'] = $page_token;
 		}
 
 		$url = add_query_arg(
 			$query_args,
-			self::API_BASE . '/business-units/' . rawurlencode( $this->business_unit_id ) . '/reviews'
+			self::API_BASE . '/business-units/' . rawurlencode( $this->business_unit_id ) . '/all-reviews'
 		);
 
 		$response = wp_remote_get( $url, [
@@ -236,13 +252,11 @@ class TP_API_Client {
 		if ( 200 !== $code ) {
 			return new WP_Error(
 				'tp_reviews_error',
-				sprintf( 'Reviews request failed with HTTP %d on page %d', $code, $page )
+				sprintf( 'Reviews request failed with HTTP %d (pageToken: %s)', $code, $page_token ?? 'none' )
 			);
 		}
 
-		$body = json_decode( wp_remote_retrieve_body( $response ), true );
-
-		// Sanitize all fields from the untrusted API response at the boundary (T-02-03).
+		$body        = json_decode( wp_remote_retrieve_body( $response ), true );
 		$reviews     = [];
 		$raw_reviews = $body['reviews'] ?? [];
 
@@ -255,51 +269,19 @@ class TP_API_Client {
 				'author'       => sanitize_text_field( $item['consumer']['displayName'] ?? '' ),
 				'published_at' => sanitize_text_field( $item['createdAt'] ?? '0000-00-00 00:00:00' ),
 				'language'     => sanitize_text_field( $item['language'] ?? '' ),
-				'is_verified'  => ( isset( $item['reviewVerificationLevel'] ) && in_array( $item['reviewVerificationLevel'], [ 'VERIFIED', 'SEMI_VERIFIED' ], true ) ) ? 1 : 0,
+				// all-reviews uses isVerified (bool); legacy /reviews used reviewVerificationLevel (string).
+				'is_verified'  => ( ! empty( $item['isVerified'] )
+					|| ( isset( $item['reviewVerificationLevel'] )
+						&& in_array( $item['reviewVerificationLevel'], [ 'VERIFIED', 'SEMI_VERIFIED' ], true ) ) ) ? 1 : 0,
 				'raw_json'     => wp_json_encode( $item ),
 			];
 		}
 
-		// Calculate total pages from the API-reported total (T-02-05 — not from user input).
-		$total_reviews = (int) ( $body['totalNumberOfReviews'] ?? 0 );
-		$total_pages   = ( $total_reviews > 0 ) ? (int) ceil( $total_reviews / 100 ) : 1;
+		$next = ! empty( $body['nextPageToken'] ) ? (string) $body['nextPageToken'] : null;
 
 		return [
-			'reviews'     => $reviews,
-			'total_pages' => $total_pages,
+			'reviews'         => $reviews,
+			'next_page_token' => $next,
 		];
-	}
-
-	/**
-	 * Fetches all reviews by paginating through all available pages.
-	 *
-	 * Calls get_reviews() in a loop, accumulating results. Aborts immediately
-	 * and propagates the WP_Error if any page fetch fails. The pagination
-	 * terminates when page > total_pages (T-02-05 — loop bounded by
-	 * API-reported total, not user input).
-	 *
-	 * @param string $since_date ISO 8601 date string or '' for all reviews (D-01).
-	 *
-	 * @return array|WP_Error Flat array of all sanitized review items on success,
-	 *                        WP_Error on any page failure.
-	 */
-	public function get_all_reviews( string $since_date = '' ): array|WP_Error {
-		$all_reviews = [];
-		$page        = 1;
-
-		do {
-			$result = $this->get_reviews( $page, $since_date );
-
-			if ( is_wp_error( $result ) ) {
-				return $result; // Abort and propagate the error.
-			}
-
-			$all_reviews = array_merge( $all_reviews, $result['reviews'] );
-			$total_pages = $result['total_pages'];
-			$page++;
-
-		} while ( $page <= $total_pages );
-
-		return $all_reviews;
 	}
 }

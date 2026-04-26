@@ -97,6 +97,7 @@ class TP_Activator {
   language  VARCHAR(10) NOT NULL DEFAULT '',
   is_verified  TINYINT(1) UNSIGNED NOT NULL DEFAULT 0,
   raw_json  LONGTEXT NOT NULL DEFAULT '',
+  last_synced_at  DATETIME NULL DEFAULT NULL,
   PRIMARY KEY  (id),
   UNIQUE KEY review_id (review_id),
   KEY stars (stars),
