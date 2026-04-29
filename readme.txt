@@ -4,7 +4,7 @@ Tags: trustpilot, reviews, ratings, shortcode, elementor
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 1.2.1
+Stable tag: 1.2.2
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -58,6 +58,9 @@ Configurable in Settings. Defaults to daily at 03:00 in your site timezone.
 No. Uninstall (Plugins → Delete) drops the reviews table and all settings. Deactivate alone does not. If you want to reinstall without data loss, use the in-place update mechanism (already built in) instead of delete/reinstall.
 
 == Changelog ==
+
+= 1.2.2 =
+* Smoke-test release — verifies the in-place update flow against the public dist repo. No functional changes.
 
 = 1.2.1 =
 * Add README.md and readme.txt — readme.txt drives the "View details" modal in WP admin and the Plugin Update Checker info screen.
