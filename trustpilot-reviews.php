@@ -12,6 +12,7 @@
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       trustpilot-reviews
+ * Update URI:        false
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -34,17 +35,6 @@ TP_REST_API::register_hooks();
 // Registers cron_schedules filter early so 'weekly' is known before any
 // wp_schedule_event() call (activation hook fires after this include).
 TP_Cron_Manager::register_hooks();
-
-// Prevent WordPress from matching this plugin against the wp.org update API.
-// The slug "trustpilot-reviews" conflicts with a public wp.org plugin — without
-// this filter WordPress would offer that plugin's updates as if they applied here.
-add_filter( 'site_transient_update_plugins', static function( $transient ) {
-	$basename = plugin_basename( TP_PLUGIN_FILE );
-	if ( isset( $transient->response[ $basename ] ) ) {
-		unset( $transient->response[ $basename ] );
-	}
-	return $transient;
-} );
 
 register_activation_hook( __FILE__, [ 'TP_Activator', 'activate' ] );
 
