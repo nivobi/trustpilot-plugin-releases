@@ -48,13 +48,17 @@ delete_option( 'tp_sync_time' );
 delete_option( 'tp_migrations_done' );
 delete_option( 'tp_date_format' );
 
-// 2b. Delete preset-cache transients (and their timeouts).
-//     Transients live in wp_options as `_transient_<key>` and `_transient_timeout_<key>`.
-//     Using a single LIKE pattern keeps the cleanup independent of how many presets exist.
+// 2b. Belt-and-suspenders sweep — anything else namespaced under `tp_` from
+//     prior versions, plus all preset-cache transients (and their timeouts).
+//     The plugin owns the `tp_` prefix in wp_options exclusively, so a
+//     prefix-LIKE delete is safe and survives schema drift across versions.
+//     Transients live as `_transient_<key>` and `_transient_timeout_<key>`.
 $wpdb->query( $wpdb->prepare( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	"DELETE FROM {$wpdb->options}
 	  WHERE option_name LIKE %s
+	     OR option_name LIKE %s
 	     OR option_name LIKE %s",
+	$wpdb->esc_like( 'tp_' ) . '%',
 	$wpdb->esc_like( '_transient_tp_preset_cache_' ) . '%',
 	$wpdb->esc_like( '_transient_timeout_tp_preset_cache_' ) . '%'
 ) );
