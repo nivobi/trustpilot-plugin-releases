@@ -43,6 +43,10 @@ TP_Cron_Manager::register_hooks();
 // -----------------------------------------------------------------------
 require_once TP_PLUGIN_DIR . 'lib/plugin-update-checker.php';
 
+// Stored as a global so it can be reached for manual `checkForUpdates()` from
+// WP-CLI / debug contexts; PUC's static factory keeps its own internal handle
+// for normal scheduled checks regardless.
+global $tp_update_checker;
 $tp_update_checker = YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
 	'https://github.com/nivobi/trustpilot-plugin-releases',
 	__FILE__,
