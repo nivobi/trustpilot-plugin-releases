@@ -28,9 +28,19 @@ class TP_Activator {
 	 */
 	public static function activate(): void {
 		self::create_tables();
-		if ( ! wp_next_scheduled( 'tp_daily_sync' ) ) {
-			wp_schedule_event( time(), 'daily', 'tp_daily_sync' );
+		self::run_migrations();
+
+		// Set defaults on fresh installs so the schedule UI has values to render.
+		if ( false === get_option( 'tp_sync_frequency', false ) ) {
+			update_option( 'tp_sync_frequency', 'daily', false );
 		}
+		if ( false === get_option( 'tp_sync_time', false ) ) {
+			update_option( 'tp_sync_time', '03:00', false );
+		}
+
+		// Always (re)schedule via the manager so frequency/time options govern
+		// the slug and next-run timestamp — not a hardcoded 'daily' interval.
+		TP_Cron_Manager::reschedule();
 	}
 
 	/**
@@ -40,9 +50,9 @@ class TP_Activator {
 	 * that is uninstall.php's responsibility (Pitfall P6).
 	 */
 	public static function deactivate(): void {
-		$timestamp = wp_next_scheduled( 'tp_daily_sync' );
+		$timestamp = wp_next_scheduled( TP_Cron_Manager::HOOK );
 		if ( $timestamp ) {
-			wp_unschedule_event( $timestamp, 'tp_daily_sync' );
+			wp_unschedule_event( $timestamp, TP_Cron_Manager::HOOK );
 		}
 	}
 
@@ -57,15 +67,66 @@ class TP_Activator {
 	 * database query on every page load once the table is up to date.
 	 */
 	public static function maybe_create_table(): void {
-		if ( get_option( 'tp_db_version' ) === TP_PLUGIN_VERSION ) {
+		if ( get_option( 'tp_db_version' ) !== TP_PLUGIN_VERSION ) {
+			global $wpdb;
+			$table = $wpdb->prefix . 'tp_reviews';
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			if ( $wpdb->get_var( "SHOW TABLES LIKE '$table'" ) !== $table ) {
+				self::create_tables();
+			}
+		}
+		// Migrations are gated independently of tp_db_version so they apply to
+		// already-installed sites whose DB version already matches.
+		self::run_migrations();
+	}
+
+	/**
+	 * Idempotent one-time migrations gated by tp_migrations_done == version.
+	 *
+	 * Currently:
+	 *   - Demotes long-lived sync state options to autoload=no so they stop
+	 *     loading on every page request when only cron reads them.
+	 */
+	public static function run_migrations(): void {
+		if ( get_option( 'tp_migrations_done' ) === TP_PLUGIN_VERSION ) {
 			return;
 		}
-		global $wpdb;
-		$table = $wpdb->prefix . 'tp_reviews';
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
-		if ( $wpdb->get_var( "SHOW TABLES LIKE '$table'" ) !== $table ) {
-			self::create_tables();
+
+		// Demote sync-state options to autoload=no so they stop loading on
+		// every page request when only cron reads them.
+		$non_autoload = [
+			'tp_sync_cursor',
+			'tp_full_sync_mode',
+			'tp_sync_start',
+			'tp_full_sync_processed',
+			'tp_last_error',
+			'tp_last_sync',
+			'tp_last_sync_count',
+			'tp_is_initial_sync_done',
+		];
+		foreach ( $non_autoload as $opt ) {
+			$val = get_option( $opt, null );
+			if ( null === $val ) {
+				continue;
+			}
+			delete_option( $opt );
+			update_option( $opt, $val, false );
 		}
+
+		// Seed schedule defaults on existing installs that pre-date the
+		// schedule UI, then reschedule via the cron manager so the (likely
+		// hardcoded-daily) event lines up with the option-driven slug + time.
+		if ( false === get_option( 'tp_sync_frequency', false ) ) {
+			update_option( 'tp_sync_frequency', 'daily', false );
+		}
+		if ( false === get_option( 'tp_sync_time', false ) ) {
+			update_option( 'tp_sync_time', '03:00', false );
+		}
+		if ( class_exists( 'TP_Cron_Manager' ) ) {
+			TP_Cron_Manager::reschedule();
+		}
+
+		update_option( 'tp_migrations_done', TP_PLUGIN_VERSION, false );
 	}
 
 	/**

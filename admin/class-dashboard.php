@@ -109,11 +109,30 @@ class TP_Dashboard {
 			</div>
 		<?php endif; ?>
 
+		<?php
+		$next_run   = TP_Cron_Manager::get_next_run();
+		$freq_label = TP_Cron_Manager::frequency_label( TP_Cron_Manager::get_frequency_slug() );
+		if ( $next_run > 0 ) {
+			$next_display = esc_html(
+				wp_date(
+					get_option( 'date_format' ) . ' ' . get_option( 'time_format' ),
+					$next_run
+				)
+			) . ' <span class="description">(' . esc_html( $freq_label ) . ')</span>';
+		} else {
+			$next_display = esc_html__( 'Not scheduled', 'trustpilot-reviews' );
+		}
+		?>
+
 		<div class="tp-status-card">
 			<table class="tp-status-table">
 				<tr>
 					<td class="tp-status-label"><?php esc_html_e( 'Last sync', 'trustpilot-reviews' ); ?></td>
 					<td class="tp-status-value"><?php echo $sync_display; // Already escaped above. ?></td>
+				</tr>
+				<tr>
+					<td class="tp-status-label"><?php esc_html_e( 'Next sync', 'trustpilot-reviews' ); ?></td>
+					<td class="tp-status-value"><?php echo $next_display; // Already escaped above. ?></td>
 				</tr>
 				<tr>
 					<td class="tp-status-label"><?php esc_html_e( 'Reviews in database', 'trustpilot-reviews' ); ?></td>

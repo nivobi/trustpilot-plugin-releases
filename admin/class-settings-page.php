@@ -78,6 +78,131 @@ class TP_Settings_Page {
             self::PAGE_SLUG,
             'tp_api_section'
         );
+
+        // --- Sync schedule section ----------------------------------------
+        register_setting( self::OPTION_GROUP, 'tp_sync_frequency', [
+            'type'              => 'string',
+            'default'           => 'daily',
+            'sanitize_callback' => [ $this, 'sanitize_sync_frequency' ],
+        ] );
+        register_setting( self::OPTION_GROUP, 'tp_sync_time', [
+            'type'              => 'string',
+            'default'           => '03:00',
+            'sanitize_callback' => [ $this, 'sanitize_sync_time' ],
+        ] );
+
+        add_settings_section(
+            'tp_schedule_section',
+            __( 'Sync Schedule', 'trustpilot-reviews' ),
+            [ $this, 'render_schedule_section_intro' ],
+            self::PAGE_SLUG
+        );
+
+        add_settings_field(
+            'tp_sync_frequency',
+            __( 'Sync frequency', 'trustpilot-reviews' ),
+            [ $this, 'render_sync_frequency_field' ],
+            self::PAGE_SLUG,
+            'tp_schedule_section'
+        );
+        add_settings_field(
+            'tp_sync_time',
+            __( 'Run at (HH:MM)', 'trustpilot-reviews' ),
+            [ $this, 'render_sync_time_field' ],
+            self::PAGE_SLUG,
+            'tp_schedule_section'
+        );
+    }
+
+    /**
+     * Allowlist sanitizer for the sync frequency option.
+     */
+    public function sanitize_sync_frequency( $value ): string {
+        $value = is_string( $value ) ? $value : '';
+        return in_array( $value, TP_Cron_Manager::ALLOWED_FREQUENCIES, true ) ? $value : 'daily';
+    }
+
+    /**
+     * Sanitize the run-at time string. Accepts HH:MM (24-hour). Falls back
+     * to '03:00' on any malformed input so the cron always has a valid time.
+     */
+    public function sanitize_sync_time( $value ): string {
+        $value = is_string( $value ) ? trim( $value ) : '';
+        return preg_match( '/^([01]\d|2[0-3]):[0-5]\d$/', $value ) ? $value : '03:00';
+    }
+
+    /**
+     * Brief copy explaining the two schedule fields. Shown above the section.
+     */
+    public function render_schedule_section_intro(): void {
+        $tz = wp_timezone_string();
+        printf(
+            '<p>%s <code>%s</code>.</p>',
+            esc_html__( 'How often the plugin pulls new Trustpilot reviews. Time-of-day applies to Daily and Weekly only and is interpreted in your site timezone:', 'trustpilot-reviews' ),
+            esc_html( $tz )
+        );
+    }
+
+    /**
+     * Frequency <select>. Inline JS hides the time row when "hourly" or
+     * "twicedaily" is chosen — cosmetic only; sanitize_sync_time always
+     * keeps a valid HH:MM in the option.
+     */
+    public function render_sync_frequency_field(): void {
+        $current = (string) get_option( 'tp_sync_frequency', 'daily' );
+        $options = [
+            'hourly'     => __( 'Hourly',       'trustpilot-reviews' ),
+            'twicedaily' => __( 'Twice daily',  'trustpilot-reviews' ),
+            'daily'      => __( 'Daily',        'trustpilot-reviews' ),
+            'weekly'     => __( 'Weekly',       'trustpilot-reviews' ),
+        ];
+        echo '<select id="tp_sync_frequency" name="tp_sync_frequency">';
+        foreach ( $options as $value => $label ) {
+            printf(
+                '<option value="%s"%s>%s</option>',
+                esc_attr( $value ),
+                selected( $current, $value, false ),
+                esc_html( $label )
+            );
+        }
+        echo '</select>';
+        ?>
+        <script>
+        (function(){
+            var sel = document.getElementById('tp_sync_frequency');
+            if ( ! sel ) return;
+            function toggle() {
+                var hide = ( sel.value === 'hourly' || sel.value === 'twicedaily' );
+                var input = document.getElementById('tp_sync_time');
+                if ( ! input ) return;
+                var row = input.closest('tr');
+                if ( row ) row.style.display = hide ? 'none' : '';
+            }
+            sel.addEventListener('change', toggle);
+            toggle();
+        })();
+        </script>
+        <?php
+    }
+
+    /**
+     * Time-of-day picker (HTML5 <input type="time">).
+     */
+    public function render_sync_time_field(): void {
+        $current = (string) get_option( 'tp_sync_time', '03:00' );
+        printf(
+            '<input type="time" id="tp_sync_time" name="tp_sync_time" value="%s" />',
+            esc_attr( $current )
+        );
+        $next = TP_Cron_Manager::get_next_run();
+        if ( $next > 0 ) {
+            $fmt = get_option( 'date_format' ) . ' ' . get_option( 'time_format' );
+            printf(
+                ' <span class="description">%s <code>%s</code></span>',
+                esc_html__( 'Next scheduled run:', 'trustpilot-reviews' ),
+                esc_html( wp_date( $fmt, $next ) )
+            );
+        }
     }
 
     /**

@@ -62,11 +62,20 @@ class TP_API_Client {
 	 * get_all_reviews() may call get_reviews() 78+ times for large accounts.
 	 * Fetching a new token per page multiplies token-request overhead by the
 	 * page count. The token is valid for 1 hour — safe to reuse within one
-	 * sync run (a single TP_API_Client instance).
+	 * sync run, but long full syncs can outlive it, so we track expiry and
+	 * refresh when needed.
 	 *
 	 * @var string|null
 	 */
 	private ?string $cached_token = null;
+
+	/**
+	 * Unix timestamp at which $cached_token becomes invalid.
+	 * Set from the OAuth response's expires_in minus a 60s safety buffer.
+	 *
+	 * @var int|null
+	 */
+	private ?int $token_expires_at = null;
 
 	/**
 	 * Constructor — reads credentials from wp_options.
@@ -88,11 +97,19 @@ class TP_API_Client {
 	 *
 	 * @return string|WP_Error Bearer token string on success, WP_Error on failure.
 	 */
-	public function get_access_token(): string|WP_Error {
-		// Return cached token if already fetched this instance lifetime.
-		if ( null !== $this->cached_token ) {
+	public function get_access_token( bool $force_refresh = false ): string|WP_Error {
+		// Return cached token if still valid. Tokens are short-lived (~1h);
+		// long full syncs can outlast them, so we check expiry on every call.
+		if ( ! $force_refresh
+			&& null !== $this->cached_token
+			&& null !== $this->token_expires_at
+			&& time() < $this->token_expires_at
+		) {
 			return $this->cached_token;
 		}
+
+		$this->cached_token     = null;
+		$this->token_expires_at = null;
 
 		// Basic auth: base64-encode "client_id:client_secret" — T-02-01, T-02-02.
 		$credentials = base64_encode( $this->api_key . ':' . $this->api_secret );
@@ -124,6 +141,9 @@ class TP_API_Client {
 			return new WP_Error( 'tp_token_missing', 'OAuth2 response missing access_token field' );
 		}
 
+		// 60s safety buffer so long requests don't hit a server-side expiry mid-flight.
+		$expires_in             = isset( $body['expires_in'] ) ? (int) $body['expires_in'] : 3600;
+		$this->token_expires_at = time() + max( 60, $expires_in - 60 );
 		// SECURITY: $credentials and $body['access_token'] are NEVER passed to error_log().
 		$this->cached_token = $body['access_token'];
 		return $this->cached_token;
@@ -236,19 +256,39 @@ class TP_API_Client {
 			self::API_BASE . '/business-units/' . rawurlencode( $this->business_unit_id ) . '/all-reviews'
 		);
 
-		$response = wp_remote_get( $url, [
-			'headers' => [
-				'Authorization' => 'Bearer ' . $token,
-				'apikey'        => $this->api_key,
-			],
-			'timeout' => 30,
-		] );
+		$do_request = function( string $bearer ) use ( $url ) {
+			return wp_remote_get( $url, [
+				'headers' => [
+					'Authorization' => 'Bearer ' . $bearer,
+					'apikey'        => $this->api_key,
+				],
+				'timeout' => 30,
+			] );
+		};
+
+		$response = $do_request( $token );
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		}
 
 		$code = wp_remote_retrieve_response_code( $response );
+
+		// One-shot retry on 401: token may have expired mid-batch (Trustpilot
+		// tokens are short-lived; a long full sync can outlast its access_token).
+		if ( 401 === $code ) {
+			$token = $this->get_access_token( true );
+			if ( is_wp_error( $token ) ) {
+				return $token;
+			}
+			$response = $do_request( $token );
+			if ( is_wp_error( $response ) ) {
+				return $response;
+			}
+			$code = wp_remote_retrieve_response_code( $response );
+			error_log( '[TrustpilotReviews] OAuth token refreshed mid-batch after 401' );
+		}
+
 		if ( 200 !== $code ) {
 			return new WP_Error(
 				'tp_reviews_error',

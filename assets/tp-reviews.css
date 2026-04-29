@@ -25,11 +25,15 @@
 	display: flex;
 	align-items: center;
 	gap: 12px;
+
+	/* Visible card count per breakpoint — overridden below */
+	--tp-cards-visible: 4;
+	--tp-card-gap: 16px;
 }
 
 .tp-carousel-track {
 	display: flex;
-	gap: 16px;
+	gap: var( --tp-card-gap );
 	overflow-x: auto;
 	scroll-snap-type: x mandatory;
 	scrollbar-width: none;
@@ -98,8 +102,13 @@
 
 /* ── Review card ── */
 .tp-review-card {
-	flex: 0 0 214px;
-	width: 214px;
+	/* Auto-fit: card width fills track exactly so no card is cut off.
+	   Width = (track - total gaps) / visible count. */
+	flex: 0 0 calc(
+		( 100% - ( var( --tp-cards-visible ) - 1 ) * var( --tp-card-gap ) )
+		/ var( --tp-cards-visible )
+	);
+	min-width: 0;
 	scroll-snap-align: start;
 	background: #f8f9fa;
 	border: none;
@@ -257,12 +266,16 @@
 	text-align: center;
 }
 
-/* Cards stay fixed-width; carousel scrolls on small screens */
+/* Auto-adjust visible card count — last card never cut off.
+   Tweak breakpoints to taste. */
+@media ( max-width: 1200px ) {
+	.tp-carousel { --tp-cards-visible: 3; }
+}
+@media ( max-width: 800px ) {
+	.tp-carousel { --tp-cards-visible: 2; }
+}
 @media ( max-width: 480px ) {
-	.tp-review-card {
-		flex: 0 0 160px;
-		width: 160px;
-	}
+	.tp-carousel { --tp-cards-visible: 1; }
 	.tp-carousel-btn {
 		width: 24px;
 		height: 24px;

@@ -38,5 +38,26 @@ delete_option( 'tp_business_domain' );   // Phase 2: raw domain input (new in Ph
 // Phase 3 — preset manager.
 delete_option( 'tp_presets' );
 
+// Phase 4 — sync state, schedule, migration flag.
+delete_option( 'tp_sync_cursor' );
+delete_option( 'tp_full_sync_mode' );
+delete_option( 'tp_sync_start' );
+delete_option( 'tp_full_sync_processed' );
+delete_option( 'tp_sync_frequency' );
+delete_option( 'tp_sync_time' );
+delete_option( 'tp_migrations_done' );
+delete_option( 'tp_date_format' );
+
+// 2b. Delete preset-cache transients (and their timeouts).
+//     Transients live in wp_options as `_transient_<key>` and `_transient_timeout_<key>`.
+//     Using a single LIKE pattern keeps the cleanup independent of how many presets exist.
+$wpdb->query( $wpdb->prepare( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	"DELETE FROM {$wpdb->options}
+	  WHERE option_name LIKE %s
+	     OR option_name LIKE %s",
+	$wpdb->esc_like( '_transient_tp_preset_cache_' ) . '%',
+	$wpdb->esc_like( '_transient_timeout_tp_preset_cache_' ) . '%'
+) );
+
 // 3. Clear the scheduled cron hook.
 wp_clear_scheduled_hook( 'tp_daily_sync' );

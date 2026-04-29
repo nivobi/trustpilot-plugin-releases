@@ -81,7 +81,7 @@ class TP_Sync_Engine {
 		$sync_start = get_option( 'tp_sync_start', '' );
 		if ( empty( $sync_start ) ) {
 			$sync_start = gmdate( 'Y-m-d H:i:s' );
-			update_option( 'tp_sync_start', $sync_start );
+			update_option( 'tp_sync_start', $sync_start, false );
 		}
 
 		$upserted        = 0;
@@ -125,7 +125,7 @@ class TP_Sync_Engine {
 
 		if ( $sync_complete ) {
 			delete_option( 'tp_sync_cursor' );
-			update_option( 'tp_is_initial_sync_done', true );
+			update_option( 'tp_is_initial_sync_done', true, false );
 
 			// --- Reconcile: ONLY after a complete full sync ---
 			// Conditions: full_sync_mode was active AND all API pages were walked
@@ -156,13 +156,13 @@ class TP_Sync_Engine {
 			delete_option( 'tp_full_sync_mode' );
 			delete_option( 'tp_sync_start' );
 		} else {
-			update_option( 'tp_sync_cursor', $next_cursor );
+			update_option( 'tp_sync_cursor', $next_cursor, false );
 		}
 
 		// --- Step 5: Accumulate full-sync processed count ---
 		if ( $full_sync_mode ) {
 			$prev = (int) get_option( 'tp_full_sync_processed', 0 );
-			update_option( 'tp_full_sync_processed', $prev + $upserted );
+			update_option( 'tp_full_sync_processed', $prev + $upserted, false );
 		}
 
 		if ( $sync_complete ) {
@@ -173,9 +173,9 @@ class TP_Sync_Engine {
 		TP_Shortcode::bust_all_caches();
 
 		// --- Step 7: Write sync-status options ---
-		update_option( 'tp_last_sync',       gmdate( 'c' ) );
-		update_option( 'tp_last_sync_count', $upserted );
-		update_option( 'tp_last_error',      '' );
+		update_option( 'tp_last_sync',       gmdate( 'c' ), false );
+		update_option( 'tp_last_sync_count', $upserted,     false );
+		update_option( 'tp_last_error',      '',            false );
 
 		error_log( sprintf(
 			'%s Batch complete — %d upserted, %d pages, %s. Cursor: %s.',
@@ -283,9 +283,9 @@ class TP_Sync_Engine {
 	private static function handle_error( string $message, int $synced ): void {
 		error_log( sprintf( '%s %s', self::LOG_PREFIX, $message ) );
 
-		update_option( 'tp_last_sync',       gmdate( 'c' ) );
-		update_option( 'tp_last_sync_count', $synced );
-		update_option( 'tp_last_error',      $message );
+		update_option( 'tp_last_sync',       gmdate( 'c' ), false );
+		update_option( 'tp_last_sync_count', $synced,       false );
+		update_option( 'tp_last_error',      $message,      false );
 	}
 
 	/**

@@ -115,15 +115,60 @@ class TP_Shortcode {
             var next  = wrap.querySelector('.tp-carousel-next');
 
             function update() {
-                prev.disabled = track.scrollLeft <= 1;
+                // First card's offsetLeft accounts for track padding so snap
+                // points (which can leave scrollLeft > 0 at start) still register.
+                var startOffset = track.firstElementChild ? track.firstElementChild.offsetLeft : 0;
+                prev.disabled = track.scrollLeft <= startOffset + 1;
                 next.disabled = track.scrollLeft + track.offsetWidth >= track.scrollWidth - 1;
             }
 
+            // Custom smooth scroll — tunable duration + ease-in-out curve.
+            var DURATION = 700; // ms — raise for slower, lower for snappier
+            var animFrame = null;
+            function easeInOutCubic(t) {
+                return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+            }
+            function animateTo(target) {
+                if ( animFrame ) cancelAnimationFrame( animFrame );
+                var max   = track.scrollWidth - track.offsetWidth;
+                target    = Math.max( 0, Math.min( target, max ) );
+                var start = track.scrollLeft;
+                var diff  = target - start;
+                if ( Math.abs( diff ) < 1 ) return;
+                // Suspend scroll-snap so each rAF write isn't re-snapped to the
+                // nearest card (which collapses the animation into a card-swap).
+                track.style.scrollSnapType = 'none';
+                var t0 = performance.now();
+                function step(now) {
+                    var p = Math.min( 1, ( now - t0 ) / DURATION );
+                    track.scrollLeft = start + diff * easeInOutCubic( p );
+                    if ( p < 1 ) {
+                        animFrame = requestAnimationFrame( step );
+                    } else {
+                        animFrame = null;
+                        track.style.scrollSnapType = '';
+                    }
+                }
+                animFrame = requestAnimationFrame( step );
+            }
+
+            // Step exactly N visible cards per click — never leaves a half card.
+            function getCardStep() {
+                var card = track.querySelector('.tp-review-card');
+                if ( ! card ) return track.offsetWidth * 0.75;
+                var trackStyle = getComputedStyle( track );
+                var gap        = parseFloat( trackStyle.columnGap || trackStyle.gap ) || 0;
+                var carouselCS = getComputedStyle( wrap );
+                var visible    = parseFloat( carouselCS.getPropertyValue( '--tp-cards-visible' ) ) || 1;
+                visible        = Math.max( 1, Math.floor( visible ) );
+                return ( card.getBoundingClientRect().width + gap ) * visible;
+            }
+
             prev.addEventListener('click', function(){
-                track.scrollBy({ left: -track.offsetWidth * 0.75, behavior: 'smooth' });
+                animateTo( track.scrollLeft - getCardStep() );
             });
             next.addEventListener('click', function(){
-                track.scrollBy({ left: track.offsetWidth * 0.75, behavior: 'smooth' });
+                animateTo( track.scrollLeft + getCardStep() );
             });
             track.addEventListener('scroll', update, { passive: true });
             update();
@@ -292,9 +337,7 @@ class TP_Shortcode {
                 . '</a>';
         }
 
-        $time_ago = human_time_diff( (int) strtotime( (string) $review->published_at ), time() );
-        /* translators: %s: human-readable time difference e.g. "4 days" */
-        $date_str = sprintf( __( 'For %s siden', 'trustpilot-reviews' ), $time_ago );
+        $date_str = self::format_date( (string) $review->published_at );
 
         $review_url = 'https://dk.trustpilot.com/reviews/' . rawurlencode( (string) $review->review_id );
 
@@ -406,7 +449,7 @@ class TP_Shortcode {
             case 'relative':
                 return sprintf(
                     /* translators: %s: human-readable time difference e.g. "3 months" */
-                    __( '%s ago', 'trustpilot-reviews' ),
+                    __( 'For %s siden', 'trustpilot-reviews' ),
                     human_time_diff( $ts, time() )
                 );
 
