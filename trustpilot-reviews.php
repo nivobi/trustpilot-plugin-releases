@@ -3,7 +3,7 @@
  * Plugin Name:       Nivobi Trustpilot Reviews
  * Plugin URI:        https://nivobi.com
  * Description:       Syncs Trustpilot reviews to a local database via WP-Cron and serves them through a Preset Manager shortcode system.
- * Version:           1.2.2
+ * Version:           1.2.3
  * Requires at least: 6.4
  * Tested up to:      6.8
  * Requires PHP:      8.1
@@ -12,13 +12,14 @@
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       trustpilot-reviews
+ * Update URI:        https://github.com/nivobi/trustpilot-plugin-releases
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'TP_PLUGIN_VERSION', '1.2.2' );
+define( 'TP_PLUGIN_VERSION', '1.2.3' );
 define( 'TP_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'TP_PLUGIN_FILE', __FILE__ );
 
