@@ -3,7 +3,7 @@
  * Plugin Name:       Nivobi Trustpilot Reviews
  * Plugin URI:        https://nivobi.com
  * Description:       Syncs Trustpilot reviews to a local database via WP-Cron and serves them through a Preset Manager shortcode system.
- * Version:           1.1.0
+ * Version:           1.2.0
  * Requires at least: 6.4
  * Tested up to:      6.8
  * Requires PHP:      8.1
@@ -12,14 +12,13 @@
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       trustpilot-reviews
- * Update URI:        false
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'TP_PLUGIN_VERSION', '1.1.0' );
+define( 'TP_PLUGIN_VERSION', '1.2.0' );
 define( 'TP_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'TP_PLUGIN_FILE', __FILE__ );
 
@@ -35,6 +34,25 @@ TP_REST_API::register_hooks();
 // Registers cron_schedules filter early so 'weekly' is known before any
 // wp_schedule_event() call (activation hook fires after this include).
 TP_Cron_Manager::register_hooks();
+
+// -----------------------------------------------------------------------
+// Update channel — Plugin Update Checker against the public release repo.
+// New versions are published as GitHub Releases on the dist repo with the
+// trustpilot-reviews.zip attached as an asset; PUC downloads the asset
+// and lets WP install it via the standard "update available" flow.
+// -----------------------------------------------------------------------
+require_once TP_PLUGIN_DIR . 'lib/plugin-update-checker.php';
+
+$tp_update_checker = YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
+	'https://github.com/nivobi/trustpilot-plugin-releases',
+	__FILE__,
+	'trustpilot-reviews'
+);
+$tp_update_checker->setBranch( 'master' );
+// Use the .zip uploaded to each Release as the update payload (vs. building
+// a tarball of repo source). Keeps the repo source tree free of release-only
+// build artifacts and lets us strip dev-only files from the asset.
+$tp_update_checker->getVcsApi()->enableReleaseAssets();
 
 register_activation_hook( __FILE__, [ 'TP_Activator', 'activate' ] );
 
