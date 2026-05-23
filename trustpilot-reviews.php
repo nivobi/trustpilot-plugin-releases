@@ -94,8 +94,8 @@ if ( is_admin() ) {
 	add_action( 'admin_menu', function() use ( $tp_settings ) {
 		// Top-level menu item — Dashboard is the default landing page.
 		add_menu_page(
-			__( 'Trustpilot Reviews', 'trustpilot-reviews' ),
-			__( 'Trustpilot', 'trustpilot-reviews' ),
+			tp_t( 'Trustpilot Reviews', 'Trustpilot-anmeldelser' ),
+			tp_t( 'Trustpilot', 'Trustpilot' ),
 			'manage_options',
 			'tp-reviews',
 			[ 'TP_Preset_UI', 'render' ],
@@ -106,8 +106,8 @@ if ( is_admin() ) {
 		// First sub-page uses SAME slug as parent — becomes default landing page (Dashboard).
 		$presets_hook = add_submenu_page(
 			'tp-reviews',
-			__( 'Dashboard', 'trustpilot-reviews' ),
-			__( 'Dashboard', 'trustpilot-reviews' ),
+			tp_t( 'Dashboard', 'Oversigt' ),
+			tp_t( 'Dashboard', 'Oversigt' ),
 			'manage_options',
 			'tp-reviews',
 			[ 'TP_Preset_UI', 'render' ]
@@ -117,8 +117,8 @@ if ( is_admin() ) {
 		// Second sub-page — Settings.
 		$settings_hook = add_submenu_page(
 			'tp-reviews',
-			__( 'Settings', 'trustpilot-reviews' ),
-			__( 'Settings', 'trustpilot-reviews' ),
+			tp_t( 'Settings', 'Indstillinger' ),
+			tp_t( 'Settings', 'Indstillinger' ),
 			'manage_options',
 			'tp-settings',
 			[ $tp_settings, 'render' ]
