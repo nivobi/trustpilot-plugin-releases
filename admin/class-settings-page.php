@@ -91,6 +91,28 @@ class TP_Settings_Page {
             'sanitize_callback' => [ $this, 'sanitize_sync_time' ],
         ] );
 
+        // --- Language section ---------------------------------------------
+        register_setting( self::OPTION_GROUP, 'tp_language', [
+            'type'              => 'string',
+            'default'           => 'da',
+            'sanitize_callback' => [ $this, 'sanitize_language' ],
+        ] );
+
+        add_settings_section(
+            'tp_language_section',
+            tp_t( 'Language', 'Sprog' ),
+            [ $this, 'render_language_section_intro' ],
+            self::PAGE_SLUG
+        );
+
+        add_settings_field(
+            'tp_language',
+            tp_t( 'Plugin language', 'Plugin-sprog' ),
+            [ $this, 'render_language_field' ],
+            self::PAGE_SLUG,
+            'tp_language_section'
+        );
+
         add_settings_section(
             'tp_schedule_section',
             __( 'Sync Schedule', 'trustpilot-reviews' ),
@@ -129,6 +151,46 @@ class TP_Settings_Page {
     public function sanitize_sync_time( $value ): string {
         $value = is_string( $value ) ? trim( $value ) : '';
         return preg_match( '/^([01]\d|2[0-3]):[0-5]\d$/', $value ) ? $value : '03:00';
+    }
+
+    /**
+     * Allowlist sanitizer for the language option. Only 'da' / 'en' accepted.
+     */
+    public function sanitize_language( $value ): string {
+        return $value === 'en' ? 'en' : 'da';
+    }
+
+    /**
+     * Brief copy explaining the language switch.
+     */
+    public function render_language_section_intro(): void {
+        printf(
+            '<p>%s</p>',
+            esc_html( tp_t(
+                'Controls the language of all visitor-facing widgets and admin labels. Number and date formatting follow the chosen language.',
+                'Styrer sproget på alle widgets, der vises for besøgende, samt etiketterne i administrationen. Tal- og datoformatering følger det valgte sprog.'
+            ) )
+        );
+    }
+
+    /**
+     * Render the language radio buttons.
+     */
+    public function render_language_field(): void {
+        $current = tp_lang();
+        ?>
+        <fieldset>
+            <label>
+                <input type="radio" name="tp_language" value="da" <?php checked( $current, 'da' ); ?> />
+                <?php echo esc_html( tp_t( 'Danish', 'Dansk' ) ); ?>
+            </label>
+            <br>
+            <label>
+                <input type="radio" name="tp_language" value="en" <?php checked( $current, 'en' ); ?> />
+                <?php echo esc_html( tp_t( 'English', 'Engelsk' ) ); ?>
+            </label>
+        </fieldset>
+        <?php
     }
 
     /**
