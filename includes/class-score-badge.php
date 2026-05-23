@@ -33,6 +33,8 @@ class TP_Score_Badge {
      * @return string HTML markup.
      */
     public static function render( $atts = [] ): string {
+        wp_enqueue_style( 'tp-reviews' );
+
         $score       = (float)  get_option( 'tp_trust_score',  0 );
         $count       = (int)    get_option( 'tp_review_count', 0 );
         $profile_url = (string) get_option( 'tp_profile_url',  '' );
