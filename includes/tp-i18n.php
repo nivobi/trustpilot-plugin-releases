@@ -3,7 +3,7 @@
  * Language helpers.
  *
  * Two-language switcher driven by the `tp_language` wp_option:
- *   - tp_lang()     → 'da' (default) or 'en'
+ *   - tp_lang()     → 'en' (default) or 'da'
  *   - tp_t($en,$da) → returns the appropriate string
  *   - tp_number()   → integer formatted per language
  *   - tp_decimal()  → float formatted per language
@@ -22,8 +22,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 if ( ! function_exists( 'tp_lang' ) ) {
     function tp_lang(): string {
-        $lang = get_option( 'tp_language', 'da' );
-        return $lang === 'en' ? 'en' : 'da';
+        $lang = get_option( 'tp_language', 'en' );
+        return $lang === 'da' ? 'da' : 'en';
     }
 }
 

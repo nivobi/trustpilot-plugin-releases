@@ -94,7 +94,7 @@ class TP_Settings_Page {
         // --- Language section ---------------------------------------------
         register_setting( self::OPTION_GROUP, 'tp_language', [
             'type'              => 'string',
-            'default'           => 'da',
+            'default'           => 'en',
             'sanitize_callback' => [ $this, 'sanitize_language' ],
         ] );
 
@@ -157,7 +157,7 @@ class TP_Settings_Page {
      * Allowlist sanitizer for the language option. Only 'da' / 'en' accepted.
      */
     public function sanitize_language( string $value ): string {
-        return $value === 'en' ? 'en' : 'da';
+        return $value === 'da' ? 'da' : 'en';
     }
 
     /**

@@ -1,7 +1,10 @@
 /*
  * Trustpilot Reviews — Frontend Shortcode Styles
  * Matches the official Trustpilot widget aesthetic.
- * Namespaced .tp- to prevent collision with themes/plugins.
+ *
+ * Every rule is scoped under `.tp-reviews-wrapper` to raise specificity above
+ * common theme rules (e.g. `.entry-content h3`, `button`) that would otherwise
+ * bleed into the carousel buttons and review titles.
  */
 
 /* ── Wrapper ── */
@@ -20,7 +23,7 @@
 }
 
 /* ── Carousel container ── */
-.tp-carousel {
+.tp-reviews-wrapper .tp-carousel {
 	position: relative;
 	display: flex;
 	align-items: center;
@@ -31,7 +34,7 @@
 	--tp-card-gap: 16px;
 }
 
-.tp-carousel-track {
+.tp-reviews-wrapper .tp-carousel-track {
 	display: flex;
 	gap: var( --tp-card-gap );
 	overflow-x: auto;
@@ -43,26 +46,57 @@
 	min-width: 0;
 }
 
-.tp-carousel-track::-webkit-scrollbar {
+.tp-reviews-wrapper .tp-carousel-track::-webkit-scrollbar {
 	display: none;
 }
 
-/* ── Arrow buttons ── */
-.tp-carousel-btn {
+/* ── Arrow buttons ──
+   Aggressive reset: themes commonly style `button` with green pill backgrounds
+   (WooCommerce / Astra / Hello Elementor). Scoping plus explicit resets stops
+   that bleed. */
+.tp-reviews-wrapper .tp-carousel-btn {
 	flex-shrink: 0;
 	position: relative;
 	width: 24px;
 	height: 24px;
-	border: none;
+	min-width: 0;
+	min-height: 0;
+	max-width: none;
+	max-height: none;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 0;
 	background: transparent;
+	background-color: transparent;
+	background-image: none;
+	box-shadow: none;
+	color: inherit;
+	font: inherit;
+	line-height: 1;
+	text-transform: none;
+	letter-spacing: normal;
 	cursor: pointer;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	padding: 0;
+	-webkit-appearance: none;
+	appearance: none;
 }
 
-.tp-carousel-btn::before {
+.tp-reviews-wrapper .tp-carousel-btn:hover,
+.tp-reviews-wrapper .tp-carousel-btn:focus,
+.tp-reviews-wrapper .tp-carousel-btn:active {
+	background: transparent;
+	background-color: transparent;
+	background-image: none;
+	box-shadow: none;
+	color: inherit;
+	border: 0;
+	transform: none;
+}
+
+.tp-reviews-wrapper .tp-carousel-btn::before {
 	content: '';
 	position: absolute;
 	top: 50%;
@@ -76,7 +110,7 @@
 	z-index: 0;
 }
 
-.tp-carousel-btn svg {
+.tp-reviews-wrapper .tp-carousel-btn svg {
 	position: relative;
 	z-index: 1;
 	flex-shrink: 0;
@@ -85,23 +119,23 @@
 	display: block;
 }
 
-.tp-carousel-btn:hover:not( :disabled )::before {
+.tp-reviews-wrapper .tp-carousel-btn:hover:not( :disabled )::before {
 	background: #c2d5f7;
 	width: 44px;
 	height: 44px;
 }
 
-.tp-carousel-btn:active:not( :disabled )::before {
+.tp-reviews-wrapper .tp-carousel-btn:active:not( :disabled )::before {
 	background: #a8c4f5;
 }
 
-.tp-carousel-btn:disabled {
+.tp-reviews-wrapper .tp-carousel-btn:disabled {
 	opacity: 0.2;
 	cursor: default;
 }
 
 /* ── Review card ── */
-.tp-review-card {
+.tp-reviews-wrapper .tp-review-card {
 	/* Auto-fit: card width fills track exactly so no card is cut off.
 	   Width = (track - total gaps) / visible count. */
 	flex: 0 0 calc(
@@ -122,19 +156,19 @@
 }
 
 /* ── Top row: stars + verified ── */
-.tp-review-top {
+.tp-reviews-wrapper .tp-review-top {
 	display: flex;
 	align-items: center;
 	gap: 8px;
 }
 
-.tp-review-stars svg {
+.tp-reviews-wrapper .tp-review-stars svg {
 	display: block;
 	width: 100px;
 	height: auto;
 }
 
-.tp-review-verified {
+.tp-reviews-wrapper .tp-review-verified {
 	display: inline-flex;
 	align-items: center;
 	gap: 4px;
@@ -146,12 +180,12 @@
 	text-decoration: underline;
 }
 
-.tp-review-verified:hover {
+.tp-reviews-wrapper .tp-review-verified:hover {
 	text-decoration: none;
 	color: #636363;
 }
 
-.tp-verified-icon {
+.tp-reviews-wrapper .tp-verified-icon {
 	display: inline-flex;
 	align-items: center;
 	flex-shrink: 0;
@@ -161,7 +195,7 @@
 }
 
 /* ── Review link wrapper ── */
-.tp-review-link {
+.tp-reviews-wrapper .tp-review-link {
 	display: flex;
 	flex-direction: column;
 	flex: 1;
@@ -171,33 +205,41 @@
 	min-width: 0;
 }
 
-.tp-review-card:hover .tp-stars--1 .tp-star--filled .tp-star__canvas { fill: #cc1300; }
-.tp-review-card:hover .tp-stars--2 .tp-star--filled .tp-star__canvas { fill: #cc5c00; }
-.tp-review-card:hover .tp-stars--3 .tp-star--filled .tp-star__canvas { fill: #b29000; }
-.tp-review-card:hover .tp-stars--4 .tp-star--filled .tp-star__canvas { fill: #56a700; }
-.tp-review-card:hover .tp-stars--5 .tp-star--filled .tp-star__canvas { fill: #007a52; }
-.tp-review-card:hover .tp-stars--2 .tp-star--filled .tp-star__canvas--half { fill: #cc5c00; }
-.tp-review-card:hover .tp-stars--3 .tp-star--filled .tp-star__canvas--half { fill: #b29000; }
-.tp-review-card:hover .tp-stars--4 .tp-star--filled .tp-star__canvas--half { fill: #56a700; }
-.tp-review-card:hover .tp-stars--5 .tp-star--filled .tp-star__canvas--half { fill: #007a52; }
+.tp-reviews-wrapper .tp-review-card:hover .tp-stars--1 .tp-star--filled .tp-star__canvas { fill: #cc1300; }
+.tp-reviews-wrapper .tp-review-card:hover .tp-stars--2 .tp-star--filled .tp-star__canvas { fill: #cc5c00; }
+.tp-reviews-wrapper .tp-review-card:hover .tp-stars--3 .tp-star--filled .tp-star__canvas { fill: #b29000; }
+.tp-reviews-wrapper .tp-review-card:hover .tp-stars--4 .tp-star--filled .tp-star__canvas { fill: #56a700; }
+.tp-reviews-wrapper .tp-review-card:hover .tp-stars--5 .tp-star--filled .tp-star__canvas { fill: #007a52; }
+.tp-reviews-wrapper .tp-review-card:hover .tp-stars--2 .tp-star--filled .tp-star__canvas--half { fill: #cc5c00; }
+.tp-reviews-wrapper .tp-review-card:hover .tp-stars--3 .tp-star--filled .tp-star__canvas--half { fill: #b29000; }
+.tp-reviews-wrapper .tp-review-card:hover .tp-stars--4 .tp-star--filled .tp-star__canvas--half { fill: #56a700; }
+.tp-reviews-wrapper .tp-review-card:hover .tp-stars--5 .tp-star--filled .tp-star__canvas--half { fill: #007a52; }
 
-/* ── Title ── */
-.tp-review-title {
+/* ── Title ──
+   Locked size: themes commonly set `.entry-content h3 { font-size: 24px }`
+   which would otherwise blow the card titles up. */
+.tp-reviews-wrapper .tp-review-title {
+	font-family: inherit;
 	font-size: 14px;
 	font-weight: 700;
 	color: #1a1a1a;
 	margin: 0 0 6px;
+	padding: 0;
 	line-height: 16px;
+	letter-spacing: normal;
+	text-transform: none;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
 
 /* ── Body ── */
-.tp-review-body {
+.tp-reviews-wrapper .tp-review-body {
+	font-family: inherit;
 	font-size: 13px;
 	color: #555;
 	margin: 0;
+	padding: 0;
 	line-height: 16px;
 	flex: 1;
 	overflow: hidden;
@@ -207,7 +249,7 @@
 }
 
 /* ── Footer: author + date ── */
-.tp-review-footer {
+.tp-reviews-wrapper .tp-review-footer {
 	font-size: 13px;
 	color: #636363;
 	margin-top: auto;
@@ -216,7 +258,7 @@
 	overflow: hidden;
 }
 
-.tp-review-author {
+.tp-reviews-wrapper .tp-review-author {
 	font-weight: 700;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -224,34 +266,34 @@
 	flex-shrink: 1;
 }
 
-.tp-review-date {
+.tp-reviews-wrapper .tp-review-date {
 	white-space: nowrap;
 	flex-shrink: 0;
 	margin-left: 3px;
 }
 
 /* ── Compliance block ── */
-.tp-compliance-block {
+.tp-reviews-wrapper .tp-compliance-block {
 	text-align: center;
 	padding: 10px 0 2px;
 	font-size: 13px;
 	color: #444;
 }
 
-.tp-compliance-text {
+.tp-reviews-wrapper .tp-compliance-text {
 	margin: 0 0 8px;
 	line-height: 1.5;
 }
 
-.tp-compliance-text a {
+.tp-reviews-wrapper .tp-compliance-text a {
 	color: #333;
 }
 
-.tp-compliance-logo-link {
+.tp-reviews-wrapper .tp-compliance-logo-link {
 	display: inline-block;
 }
 
-.tp-compliance-logo-link svg {
+.tp-reviews-wrapper .tp-compliance-logo-link svg {
 	display: block;
 	margin: 0 auto;
 	height: 20px;
@@ -259,7 +301,7 @@
 }
 
 /* ── Empty state ── */
-.tp-no-reviews {
+.tp-reviews-wrapper .tp-no-reviews {
 	padding: 24px;
 	color: #777;
 	font-style: italic;
@@ -269,14 +311,14 @@
 /* Auto-adjust visible card count — last card never cut off.
    Tweak breakpoints to taste. */
 @media ( max-width: 1200px ) {
-	.tp-carousel { --tp-cards-visible: 3; }
+	.tp-reviews-wrapper .tp-carousel { --tp-cards-visible: 3; }
 }
 @media ( max-width: 800px ) {
-	.tp-carousel { --tp-cards-visible: 2; }
+	.tp-reviews-wrapper .tp-carousel { --tp-cards-visible: 2; }
 }
 @media ( max-width: 480px ) {
-	.tp-carousel { --tp-cards-visible: 1; }
-	.tp-carousel-btn {
+	.tp-reviews-wrapper .tp-carousel { --tp-cards-visible: 1; }
+	.tp-reviews-wrapper .tp-carousel-btn {
 		width: 24px;
 		height: 24px;
 		font-size: 14px;
