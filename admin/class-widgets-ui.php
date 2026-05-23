@@ -110,8 +110,8 @@ class TP_Widgets_UI {
                     btn.addEventListener('click', function(){
                         var input = document.getElementById( btn.dataset.target );
                         if ( ! input ) return;
+                        var orig = btn.textContent;
                         var done = function(){
-                            var orig = btn.textContent;
                             btn.textContent = copiedLabel;
                             setTimeout(function(){ btn.textContent = orig; }, 1500);
                         };
