@@ -56,14 +56,14 @@ class TP_Settings_Page {
 
         add_settings_section(
             'tp_api_section',
-            __( 'API Credentials', 'trustpilot-reviews' ),
+            tp_t( 'API Credentials', 'API-oplysninger' ),
             '__return_false',
             self::PAGE_SLUG
         );
 
-        add_settings_field( 'tp_api_key',        __( 'API Key',         'trustpilot-reviews' ), [ $this, 'render_api_key_field'    ], self::PAGE_SLUG, 'tp_api_section' );
-        add_settings_field( 'tp_api_secret',      __( 'API Secret',      'trustpilot-reviews' ), [ $this, 'render_api_secret_field' ], self::PAGE_SLUG, 'tp_api_section' );
-        add_settings_field( 'tp_business_domain', __( 'Business Domain', 'trustpilot-reviews' ), [ $this, 'render_domain_field'     ], self::PAGE_SLUG, 'tp_api_section' );
+        add_settings_field( 'tp_api_key',        tp_t( 'API Key', 'API-n&oslash;gle' ),            [ $this, 'render_api_key_field'    ], self::PAGE_SLUG, 'tp_api_section' );
+        add_settings_field( 'tp_api_secret',      tp_t( 'API Secret', 'API-hemmelighed' ),        [ $this, 'render_api_secret_field' ], self::PAGE_SLUG, 'tp_api_section' );
+        add_settings_field( 'tp_business_domain', tp_t( 'Business Domain', 'Forretningsdom&aelig;ne' ), [ $this, 'render_domain_field'     ], self::PAGE_SLUG, 'tp_api_section' );
 
         register_setting( self::OPTION_GROUP, 'tp_date_format', [
             'type'              => 'string',
@@ -73,7 +73,7 @@ class TP_Settings_Page {
 
         add_settings_field(
             'tp_date_format',
-            __( 'Review date format', 'trustpilot-reviews' ),
+            tp_t( 'Review date format', 'Datoformat for anmeldelser' ),
             [ $this, 'render_date_format_field' ],
             self::PAGE_SLUG,
             'tp_api_section'
@@ -115,21 +115,21 @@ class TP_Settings_Page {
 
         add_settings_section(
             'tp_schedule_section',
-            __( 'Sync Schedule', 'trustpilot-reviews' ),
+            tp_t( 'Sync Schedule', 'Synkroniseringsplan' ),
             [ $this, 'render_schedule_section_intro' ],
             self::PAGE_SLUG
         );
 
         add_settings_field(
             'tp_sync_frequency',
-            __( 'Sync frequency', 'trustpilot-reviews' ),
+            tp_t( 'Sync frequency', 'Synkroniseringsfrekvens' ),
             [ $this, 'render_sync_frequency_field' ],
             self::PAGE_SLUG,
             'tp_schedule_section'
         );
         add_settings_field(
             'tp_sync_time',
-            __( 'Run at (HH:MM)', 'trustpilot-reviews' ),
+            tp_t( 'Run at (HH:MM)', 'K&oslash;rsel kl. (HH:MM)' ),
             [ $this, 'render_sync_time_field' ],
             self::PAGE_SLUG,
             'tp_schedule_section'
@@ -200,7 +200,10 @@ class TP_Settings_Page {
         $tz = wp_timezone_string();
         printf(
             '<p>%s <code>%s</code>.</p>',
-            esc_html__( 'How often the plugin pulls new Trustpilot reviews. Time-of-day applies to Daily and Weekly only and is interpreted in your site timezone:', 'trustpilot-reviews' ),
+            esc_html( tp_t(
+                'How often the plugin pulls new Trustpilot reviews. Time-of-day applies to Daily and Weekly only and is interpreted in your site timezone:',
+                'Hvor ofte plugin\'et henter nye Trustpilot-anmeldelser. Tidspunktet g&aelig;lder kun for Dagligt og Ugentligt og fortolkes i webstedets tidszone:'
+            ) ),
             esc_html( $tz )
         );
     }
@@ -213,10 +216,10 @@ class TP_Settings_Page {
     public function render_sync_frequency_field(): void {
         $current = (string) get_option( 'tp_sync_frequency', 'daily' );
         $options = [
-            'hourly'     => __( 'Hourly',       'trustpilot-reviews' ),
-            'twicedaily' => __( 'Twice daily',  'trustpilot-reviews' ),
-            'daily'      => __( 'Daily',        'trustpilot-reviews' ),
-            'weekly'     => __( 'Weekly',       'trustpilot-reviews' ),
+            'hourly'     => tp_t( 'Hourly',      'Hver time' ),
+            'twicedaily' => tp_t( 'Twice daily', 'To gange dagligt' ),
+            'daily'      => tp_t( 'Daily',       'Dagligt' ),
+            'weekly'     => tp_t( 'Weekly',      'Ugentligt' ),
         ];
         echo '<select id="tp_sync_frequency" name="tp_sync_frequency">';
         foreach ( $options as $value => $label ) {
@@ -261,7 +264,7 @@ class TP_Settings_Page {
             $fmt = get_option( 'date_format' ) . ' ' . get_option( 'time_format' );
             printf(
                 ' <span class="description">%s <code>%s</code></span>',
-                esc_html__( 'Next scheduled run:', 'trustpilot-reviews' ),
+                esc_html( tp_t( 'Next scheduled run:', 'N&aelig;ste planlagte k&oslash;rsel:' ) ),
                 esc_html( wp_date( $fmt, $next ) )
             );
         }
@@ -364,9 +367,9 @@ class TP_Settings_Page {
     public function render_date_format_field(): void {
         $current = (string) get_option( 'tp_date_format', 'month_year' );
         $options = [
-            'month_year' => __( 'Month and year (e.g. March 2024)', 'trustpilot-reviews' ),
-            'relative'   => __( 'Relative (e.g. 3 months ago)',      'trustpilot-reviews' ),
-            'full_date'  => __( 'Full date (e.g. 15 March 2024)',    'trustpilot-reviews' ),
+            'month_year' => tp_t( 'Month and year (e.g. March 2024)', 'M&aring;ned og &aring;r (fx marts 2024)' ),
+            'relative'   => tp_t( 'Relative (e.g. 3 months ago)',     'Relativ (fx for 3 m&aring;neder siden)' ),
+            'full_date'  => tp_t( 'Full date (e.g. 15 March 2024)',   'Fuld dato (fx 15. marts 2024)' ),
         ];
         echo '<select id="tp_date_format" name="tp_date_format">';
         foreach ( $options as $value => $label ) {
@@ -434,7 +437,7 @@ class TP_Settings_Page {
             add_settings_error(
                 'tp_business_domain',
                 'tp_bu_resolve_failed',
-                __( 'Could not resolve Business Unit ID from domain. Check domain and API key.', 'trustpilot-reviews' ),
+                tp_t( 'Could not resolve Business Unit ID from domain. Check domain and API key.', 'Kunne ikke finde Business Unit ID for dom&aelig;net. Tjek dom&aelig;ne og API-n&oslash;gle.' ),
                 'error'
             );
             return $domain;
@@ -449,7 +452,7 @@ class TP_Settings_Page {
             add_settings_error(
                 'tp_business_domain',
                 'tp_bu_empty',
-                __( 'Business Unit ID not found in API response.', 'trustpilot-reviews' ),
+                tp_t( 'Business Unit ID not found in API response.', 'Business Unit ID blev ikke fundet i API-svaret.' ),
                 'error'
             );
         }
@@ -475,7 +478,7 @@ class TP_Settings_Page {
                 <?php
                 settings_fields( self::OPTION_GROUP );
                 do_settings_sections( self::PAGE_SLUG );
-                submit_button( __( 'Save Settings', 'trustpilot-reviews' ) );
+                submit_button( tp_t( 'Save Settings', 'Gem indstillinger' ) );
                 ?>
             </form>
         </div>
