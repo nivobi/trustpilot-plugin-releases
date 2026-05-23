@@ -67,7 +67,7 @@ class TP_Score_Badge {
             : tp_t( 'See Trustpilot reviews', 'Se Trustpilot-anmeldelser' );
 
         $logo_html = sprintf(
-            '<img class="tp-score-badge__logo" src="%s" alt="Trustpilot" width="126" height="31" loading="lazy">',
+            '<img class="tp-score-badge__logo" src="%s" alt="Trustpilot" width="130" height="31" loading="lazy">',
             esc_url( $logo_src )
         );
 
