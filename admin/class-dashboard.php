@@ -37,7 +37,7 @@ class TP_Dashboard {
 		check_admin_referer( 'tp_sync_now' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'Insufficient permissions.', 'trustpilot-reviews' ) );
+			wp_die( esc_html( tp_t( 'Insufficient permissions.', 'Manglende rettigheder.' ) ) );
 		}
 
 		TP_Sync_Engine::run();
@@ -77,7 +77,7 @@ class TP_Dashboard {
 		$total_reviews = (int) $wpdb->get_var( "SELECT COUNT(*) FROM `{$table}`" );
 
 		if ( empty( $last_sync ) ) {
-			$sync_display = esc_html__( 'Never', 'trustpilot-reviews' );
+			$sync_display = esc_html( tp_t( 'Never', 'Aldrig' ) );
 		} else {
 			$sync_display = esc_html(
 				wp_date(
@@ -96,14 +96,14 @@ class TP_Dashboard {
 		?>
 		<?php if ( $synced ) : ?>
 			<div class="notice notice-success is-dismissible">
-				<p><?php esc_html_e( 'Sync completed successfully.', 'trustpilot-reviews' ); ?></p>
+				<p><?php echo esc_html( tp_t( 'Sync completed successfully.', 'Synkronisering gennemf&oslash;rt.' ) ); ?></p>
 			</div>
 		<?php endif; ?>
 
 		<?php if ( ! empty( $last_error ) ) : ?>
 			<div class="notice notice-warning">
 				<p>
-					<?php esc_html_e( 'Last sync error:', 'trustpilot-reviews' ); ?>
+					<?php echo esc_html( tp_t( 'Last sync error:', 'Seneste synkroniseringsfejl:' ) ); ?>
 					<?php echo ' ' . esc_html( $last_error ); ?>
 				</p>
 			</div>
@@ -120,26 +120,26 @@ class TP_Dashboard {
 				)
 			) . ' <span class="description">(' . esc_html( $freq_label ) . ')</span>';
 		} else {
-			$next_display = esc_html__( 'Not scheduled', 'trustpilot-reviews' );
+			$next_display = esc_html( tp_t( 'Not scheduled', 'Ikke planlagt' ) );
 		}
 		?>
 
 		<div class="tp-status-card">
 			<table class="tp-status-table">
 				<tr>
-					<td class="tp-status-label"><?php esc_html_e( 'Last sync', 'trustpilot-reviews' ); ?></td>
+					<td class="tp-status-label"><?php echo esc_html( tp_t( 'Last sync', 'Seneste synkronisering' ) ); ?></td>
 					<td class="tp-status-value"><?php echo $sync_display; // Already escaped above. ?></td>
 				</tr>
 				<tr>
-					<td class="tp-status-label"><?php esc_html_e( 'Next sync', 'trustpilot-reviews' ); ?></td>
+					<td class="tp-status-label"><?php echo esc_html( tp_t( 'Next sync', 'N&aelig;ste synkronisering' ) ); ?></td>
 					<td class="tp-status-value"><?php echo $next_display; // Already escaped above. ?></td>
 				</tr>
 				<tr>
-					<td class="tp-status-label"><?php esc_html_e( 'Reviews in database', 'trustpilot-reviews' ); ?></td>
+					<td class="tp-status-label"><?php echo esc_html( tp_t( 'Reviews in database', 'Anmeldelser i databasen' ) ); ?></td>
 					<td class="tp-status-value"><?php echo esc_html( (string) $total_reviews ); ?></td>
 				</tr>
 				<tr>
-					<td class="tp-status-label"><?php esc_html_e( 'Last sync count', 'trustpilot-reviews' ); ?></td>
+					<td class="tp-status-label"><?php echo esc_html( tp_t( 'Last sync count', 'Antal ved seneste synkronisering' ) ); ?></td>
 					<td class="tp-status-value"><?php echo $count_display; // esc_html() applied above or literal &mdash;. ?></td>
 				</tr>
 			</table>
@@ -149,7 +149,7 @@ class TP_Dashboard {
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 				<input type="hidden" name="action" value="tp_sync_now">
 				<?php wp_nonce_field( 'tp_sync_now' ); ?>
-				<?php submit_button( __( 'Sync Now', 'trustpilot-reviews' ), 'secondary' ); ?>
+				<?php submit_button( tp_t( 'Sync Now', 'Synkronis&eacute;r nu' ), 'secondary' ); ?>
 			</form>
 		</div>
 		<?php
@@ -161,7 +161,7 @@ class TP_Dashboard {
 		}
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e( 'Trustpilot Dashboard', 'trustpilot-reviews' ); ?></h1>
+			<h1><?php echo esc_html( tp_t( 'Trustpilot Dashboard', 'Trustpilot-oversigt' ) ); ?></h1>
 			<?php self::render_panel(); ?>
 		</div>
 		<?php
