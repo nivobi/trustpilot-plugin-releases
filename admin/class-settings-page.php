@@ -156,7 +156,7 @@ class TP_Settings_Page {
     /**
      * Allowlist sanitizer for the language option. Only 'da' / 'en' accepted.
      */
-    public function sanitize_language( $value ): string {
+    public function sanitize_language( string $value ): string {
         return $value === 'en' ? 'en' : 'da';
     }
 
