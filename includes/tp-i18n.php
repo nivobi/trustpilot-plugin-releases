@@ -51,7 +51,7 @@ if ( ! function_exists( 'tp_decimal' ) ) {
 
 if ( ! function_exists( 'tp_time_ago' ) ) {
     function tp_time_ago( int $timestamp ): string {
-        $diff = human_time_diff( $timestamp, current_time( 'timestamp' ) );
+        $diff = human_time_diff( $timestamp, time() );
         if ( tp_lang() === 'da' ) {
             $diff = strtr( $diff, [
                 'seconds' => 'sekunder', 'second' => 'sekund',
