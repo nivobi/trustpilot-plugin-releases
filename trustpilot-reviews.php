@@ -29,6 +29,7 @@ require_once TP_PLUGIN_DIR . 'includes/class-api-client.php';
 require_once TP_PLUGIN_DIR . 'includes/class-sync-engine.php';
 require_once TP_PLUGIN_DIR . 'includes/class-preset-manager.php';
 require_once TP_PLUGIN_DIR . 'includes/class-shortcode.php';
+require_once TP_PLUGIN_DIR . 'includes/class-score-badge.php';
 require_once TP_PLUGIN_DIR . 'includes/class-rest-api.php';
 require_once TP_PLUGIN_DIR . 'includes/class-cron-manager.php';
 
@@ -73,6 +74,7 @@ add_action( 'init', function() {
 
 	// Register the [tp_reviews] shortcode and frontend CSS (D-16, RESEARCH.md Pattern 1).
 	TP_Shortcode::register_hooks();
+	TP_Score_Badge::register_hooks();
 } );
 
 /**

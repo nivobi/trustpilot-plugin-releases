@@ -1,0 +1,81 @@
+<?php
+/**
+ * Score Badge Widget
+ *
+ * Registers and renders the [tp_score_badge] shortcode. Produces a linked
+ * Trustpilot logo (reusing assets/trustpilot-logo.svg) plus a localized
+ * "based on X reviews." caption. Reads already-synced wp_options — never
+ * makes network calls.
+ *
+ * @package TrustpilotReviews
+ * @since   1.3.0
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
+
+class TP_Score_Badge {
+
+    /**
+     * Register hooks — called from bootstrap inside the init action, outside
+     * the is_admin() block so the shortcode is available on frontend requests.
+     */
+    public static function register_hooks(): void {
+        add_shortcode( 'tp_score_badge', [ 'TP_Score_Badge', 'render' ] );
+    }
+
+    /**
+     * Render the badge HTML. Public so TP_Widgets_UI can call it directly
+     * for the admin live preview.
+     *
+     * @param array|string $atts Shortcode attributes (none used today).
+     * @return string HTML markup.
+     */
+    public static function render( $atts = [] ): string {
+        $score       = (float)  get_option( 'tp_trust_score',  0 );
+        $count       = (int)    get_option( 'tp_review_count', 0 );
+        $profile_url = (string) get_option( 'tp_profile_url',  '' );
+
+        // Logo: reuse the existing wordmark SVG bundled in /assets.
+        $logo_src = plugins_url( 'assets/trustpilot-logo.svg', TP_PLUGIN_FILE );
+
+        $aria_label = $score > 0
+            ? sprintf(
+                tp_t( 'See Trustpilot reviews (%s out of 5)', 'Se Trustpilot-anmeldelser (%s ud af 5)' ),
+                tp_decimal( $score, 1 )
+            )
+            : tp_t( 'See Trustpilot reviews', 'Se Trustpilot-anmeldelser' );
+
+        $logo_html = sprintf(
+            '<img class="tp-score-badge__logo" src="%s" alt="Trustpilot" width="200" height="40" loading="lazy">',
+            esc_url( $logo_src )
+        );
+
+        if ( $profile_url !== '' ) {
+            $link_open  = sprintf(
+                '<a class="tp-score-badge__link" href="%s" target="_blank" rel="noopener noreferrer" aria-label="%s">',
+                esc_url( $profile_url ),
+                esc_attr( $aria_label )
+            );
+            $link_close = '</a>';
+        } else {
+            $link_open  = '<span class="tp-score-badge__link">';
+            $link_close = '</span>';
+        }
+
+        $caption_html = '';
+        if ( $count > 0 ) {
+            $caption_text = sprintf(
+                tp_t( 'based on %s reviews.', 'baseret p&aring; %s anmeldelser.' ),
+                tp_number( $count )
+            );
+            $caption_html = '<p class="tp-score-badge__caption">' . $caption_text . '</p>';
+        }
+
+        return '<div class="tp-score-badge">'
+            . $link_open . $logo_html . $link_close
+            . $caption_html
+            . '</div>';
+    }
+}
