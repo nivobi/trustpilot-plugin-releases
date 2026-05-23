@@ -327,7 +327,8 @@
 
 /* --- TrustScore badge widget ([tp_score_badge]) -------------------- */
 /* Defensive: theme/Elementor often override img sizing and link decoration,
-   so badge rules use higher specificity + !important on visual essentials. */
+   so badge rules use higher specificity + !important on visual essentials.
+   Three size variants — small (for headers), medium (default), large. */
 .tp-score-badge {
     display: flex;
     flex-direction: column;
@@ -341,24 +342,36 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    padding: 2px 4px;
     text-decoration: none !important;
     border: 0;
     box-shadow: none;
     color: #1c1c1c;
 }
 .tp-score-badge .tp-score-badge__score {
-    font-size: 16px;
     font-weight: 400;
     color: inherit;
+    white-space: nowrap;
 }
 .tp-score-badge .tp-score-badge__logo {
     display: block !important;
-    height: 24px !important;
     width: auto !important;
-    max-width: 126px;
+    flex-shrink: 0;
 }
 .tp-score-badge .tp-score-badge__caption {
     margin: 0;
-    font-size: 14px;
     color: #3a3a3a;
 }
+
+/* Size variants — control score font, logo height, caption font together. */
+.tp-score-badge--small .tp-score-badge__score   { font-size: 13px; }
+.tp-score-badge--small .tp-score-badge__logo    { height: 18px !important; }
+.tp-score-badge--small .tp-score-badge__caption { font-size: 11px; }
+
+.tp-score-badge--medium .tp-score-badge__score   { font-size: 16px; }
+.tp-score-badge--medium .tp-score-badge__logo    { height: 24px !important; }
+.tp-score-badge--medium .tp-score-badge__caption { font-size: 12px; }
+
+.tp-score-badge--large .tp-score-badge__score   { font-size: 20px; }
+.tp-score-badge--large .tp-score-badge__logo    { height: 32px !important; }
+.tp-score-badge--large .tp-score-badge__caption { font-size: 14px; }

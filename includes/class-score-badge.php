@@ -35,6 +35,16 @@ class TP_Score_Badge {
     public static function render( $atts = [] ): string {
         wp_enqueue_style( 'tp-reviews' );
 
+        $atts = shortcode_atts(
+            [
+                'size' => 'medium', // small | medium | large
+            ],
+            (array) $atts,
+            'tp_score_badge'
+        );
+        $size       = in_array( $atts['size'], [ 'small', 'medium', 'large' ], true ) ? $atts['size'] : 'medium';
+        $size_class = 'tp-score-badge--' . $size;
+
         $score       = (float)  get_option( 'tp_trust_score',  0 );
         $count       = (int)    get_option( 'tp_review_count', 0 );
         $profile_url = (string) get_option( 'tp_profile_url',  '' );
@@ -94,7 +104,7 @@ class TP_Score_Badge {
             $caption_html = '<p class="tp-score-badge__caption">' . esc_html( $caption_text ) . '</p>';
         }
 
-        return '<div class="tp-score-badge">'
+        return '<div class="tp-score-badge ' . esc_attr( $size_class ) . '">'
             . $row_html
             . $caption_html
             . '</div>';

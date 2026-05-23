@@ -65,7 +65,6 @@ class TP_Widgets_UI {
         );
 
         $tile_title    = tp_t( 'TrustScore Badge', 'TrustScore-mærke' );
-        $shortcode_str = '[tp_score_badge]';
         $copy_label    = tp_t( 'Copy', 'Kopiér' );
         $copied_label  = tp_t( 'Copied!', 'Kopieret!' );
 
@@ -74,6 +73,22 @@ class TP_Widgets_UI {
             'Kør en synkronisering fra Oversigten for at se en live-visning.'
         );
 
+        // Each size variant: visible label, shortcode string, hint about use.
+        $variants = [
+            'small'  => [
+                'label'     => tp_t( 'Small (for headers)', 'Lille (til headers)' ),
+                'shortcode' => '[tp_score_badge size="small"]',
+            ],
+            'medium' => [
+                'label'     => tp_t( 'Medium (default)', 'Mellem (standard)' ),
+                'shortcode' => '[tp_score_badge]',
+            ],
+            'large'  => [
+                'label'     => tp_t( 'Large', 'Stor' ),
+                'shortcode' => '[tp_score_badge size="large"]',
+            ],
+        ];
+
         ?>
         <div class="wrap">
             <h1><?php echo esc_html( tp_t( 'Widgets', 'Widgets' ) ); ?></h1>
@@ -81,26 +96,33 @@ class TP_Widgets_UI {
 
             <div class="tp-widget-card">
                 <h2 class="tp-widget-card__title"><?php echo esc_html( $tile_title ); ?></h2>
-                <div class="tp-widget-card__preview">
-                    <?php if ( $has_data ) : ?>
-                        <?php echo TP_Score_Badge::render(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-                    <?php else : ?>
-                        <p class="tp-widget-card__empty"><?php echo esc_html( $empty_state ); ?></p>
-                    <?php endif; ?>
-                </div>
 
-                <div class="tp-widget-card__shortcode-row">
-                    <input
-                        type="text"
-                        class="tp-widget-card__shortcode-input"
-                        value="<?php echo esc_attr( $shortcode_str ); ?>"
-                        readonly
-                        id="tp-shortcode-score-badge"
-                    >
-                    <button type="button" class="button button-primary tp-widget-card__copy-btn" data-target="tp-shortcode-score-badge">
-                        <?php echo esc_html( $copy_label ); ?>
-                    </button>
-                </div>
+                <?php if ( ! $has_data ) : ?>
+                    <div class="tp-widget-card__preview">
+                        <p class="tp-widget-card__empty"><?php echo esc_html( $empty_state ); ?></p>
+                    </div>
+                <?php else : ?>
+                    <?php $i = 0; foreach ( $variants as $size => $v ) : $i++; $input_id = 'tp-shortcode-score-badge-' . $size; ?>
+                        <div class="tp-widget-card__variant">
+                            <h3 class="tp-widget-card__variant-label"><?php echo esc_html( $v['label'] ); ?></h3>
+                            <div class="tp-widget-card__preview">
+                                <?php echo TP_Score_Badge::render( [ 'size' => $size ] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                            </div>
+                            <div class="tp-widget-card__shortcode-row">
+                                <input
+                                    type="text"
+                                    class="tp-widget-card__shortcode-input"
+                                    value="<?php echo esc_attr( $v['shortcode'] ); ?>"
+                                    readonly
+                                    id="<?php echo esc_attr( $input_id ); ?>"
+                                >
+                                <button type="button" class="button button-primary tp-widget-card__copy-btn" data-target="<?php echo esc_attr( $input_id ); ?>">
+                                    <?php echo esc_html( $copy_label ); ?>
+                                </button>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </div>
 
             <script>
