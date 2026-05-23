@@ -4,7 +4,7 @@ Tags: trustpilot, reviews, ratings, shortcode, elementor
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 1.2.4
+Stable tag: 1.2.5
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -58,6 +58,9 @@ Configurable in Settings. Defaults to daily at 03:00 in your site timezone.
 No. Uninstall (Plugins → Delete) drops the reviews table and all settings. Deactivate alone does not. If you want to reinstall without data loss, use the in-place update mechanism (already built in) instead of delete/reinstall.
 
 == Changelog ==
+
+= 1.2.5 =
+* Release tooling fix — `release.sh` now builds the React admin bundle (`npm ci && npm run build`) before zipping. 1.2.4 shipped without `assets/build/`, leaving the Dashboard page blank in WP admin. Settings was unaffected because it's rendered server-side.
 
 = 1.2.4 =
 * Frontend CSS hardening — every selector is now scoped under `.tp-reviews-wrapper` so theme rules (notably bare `button` styles and `.entry-content h3`) no longer bleed into the carousel buttons or review titles.
