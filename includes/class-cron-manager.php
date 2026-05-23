@@ -62,7 +62,7 @@ class TP_Cron_Manager {
 		if ( ! isset( $schedules['weekly'] ) ) {
 			$schedules['weekly'] = [
 				'interval' => WEEK_IN_SECONDS,
-				'display'  => __( 'Once Weekly', 'trustpilot-reviews' ),
+				'display'  => tp_t( 'Once Weekly', 'En gang om ugen' ),
 			];
 		}
 		return $schedules;
@@ -149,11 +149,11 @@ class TP_Cron_Manager {
 	 */
 	public static function frequency_label( string $slug ): string {
 		switch ( $slug ) {
-			case 'hourly':     return __( 'Hourly',       'trustpilot-reviews' );
-			case 'twicedaily': return __( 'Twice daily',  'trustpilot-reviews' );
-			case 'weekly':     return __( 'Weekly',       'trustpilot-reviews' );
+			case 'hourly':     return tp_t( 'Hourly',       'Hver time' );
+			case 'twicedaily': return tp_t( 'Twice daily',  'To gange dagligt' );
+			case 'weekly':     return tp_t( 'Weekly',       'Ugentligt' );
 			case 'daily':
-			default:           return __( 'Daily',        'trustpilot-reviews' );
+			default:           return tp_t( 'Daily',        'Dagligt' );
 		}
 	}
 }
