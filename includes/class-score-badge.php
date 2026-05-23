@@ -39,8 +39,15 @@ class TP_Score_Badge {
         $count       = (int)    get_option( 'tp_review_count', 0 );
         $profile_url = (string) get_option( 'tp_profile_url',  '' );
 
-        // Logo: reuse the existing wordmark SVG bundled in /assets.
-        $logo_src = plugins_url( 'assets/trustpilot-logo.svg', TP_PLUGIN_FILE );
+        // Logo: reuse the existing wordmark SVG bundled in /assets. The version
+        // query string busts CDN / browser caches when the SVG file changes
+        // between plugin releases — WP only versions CSS/JS handles, not raw
+        // image src in shortcode output.
+        $logo_src = add_query_arg(
+            'ver',
+            TP_PLUGIN_VERSION,
+            plugins_url( 'assets/trustpilot-logo.svg', TP_PLUGIN_FILE )
+        );
 
         $aria_label = $score > 0
             ? sprintf(
