@@ -46,7 +46,7 @@ class TP_Preset_UI {
         check_admin_referer( 'tp_save_preset' );
 
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( esc_html__( 'Insufficient permissions.', 'trustpilot-reviews' ) );
+            wp_die( esc_html( tp_t( 'Insufficient permissions.', 'Manglende rettigheder.' ) ) );
         }
 
         // phpcs:disable WordPress.Security.NonceVerification.Missing -- nonce already verified above.
@@ -181,7 +181,7 @@ class TP_Preset_UI {
 
         // Capability check immediately after nonce — consistent with handle_save (security order: nonce → capability).
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( esc_html__( 'Insufficient permissions.', 'trustpilot-reviews' ) );
+            wp_die( esc_html( tp_t( 'Insufficient permissions.', 'Manglende rettigheder.' ) ) );
         }
 
         // Remove preset with matching slug and persist via Preset Manager.
@@ -256,10 +256,10 @@ class TP_Preset_UI {
         }
         ?>
         <div class="wrap">
-            <h1><?php esc_html_e( 'Trustpilot Reviews', 'trustpilot-reviews' ); ?></h1>
+            <h1><?php echo esc_html( tp_t( 'Trustpilot Reviews', 'Trustpilot-anmeldelser' ) ); ?></h1>
             <div id="tp-admin-root">
                 <noscript>
-                    <p><?php esc_html_e( 'This admin dashboard requires JavaScript.', 'trustpilot-reviews' ); ?></p>
+                    <p><?php echo esc_html( tp_t( 'This admin dashboard requires JavaScript.', 'Denne administrationsoversigt kr&aelig;ver JavaScript.' ) ); ?></p>
                 </noscript>
             </div>
         </div>
