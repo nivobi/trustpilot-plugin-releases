@@ -333,7 +333,6 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
     line-height: 1.4;
     width: 100%;
     text-align: center;
@@ -364,7 +363,12 @@
     color: #3a3a3a;
 }
 
-/* Size variants — control score font, logo height, caption font together. */
+/* Size variants — control score font, logo height, caption font, and the
+   vertical gap between the score row and the caption together. */
+.tp-score-badge--small  { gap: 0; }
+.tp-score-badge--medium { gap: 4px; }
+.tp-score-badge--large  { gap: 6px; }
+
 .tp-score-badge--small .tp-score-badge__score   { font-size: 13px; }
 .tp-score-badge--small .tp-score-badge__logo    { height: 18px !important; }
 .tp-score-badge--small .tp-score-badge__caption { font-size: 11px; }
