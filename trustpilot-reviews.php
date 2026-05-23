@@ -118,18 +118,7 @@ if ( is_admin() ) {
 		);
 		TP_Preset_UI::$presets_hook = (string) $presets_hook;
 
-		// Second sub-page — Settings.
-		$settings_hook = add_submenu_page(
-			'tp-reviews',
-			tp_t( 'Settings', 'Indstillinger' ),
-			tp_t( 'Settings', 'Indstillinger' ),
-			'manage_options',
-			'tp-settings',
-			[ $tp_settings, 'render' ]
-		);
-		$tp_settings->settings_hook = (string) $settings_hook;
-
-		// Third sub-page — Widgets.
+		// Second sub-page — Widgets.
 		$widgets_hook = add_submenu_page(
 			'tp-reviews',
 			tp_t( 'Widgets', 'Widgets' ),
@@ -139,5 +128,16 @@ if ( is_admin() ) {
 			[ 'TP_Widgets_UI', 'render' ]
 		);
 		TP_Widgets_UI::$widgets_hook = (string) $widgets_hook;
+
+		// Third sub-page — Settings.
+		$settings_hook = add_submenu_page(
+			'tp-reviews',
+			tp_t( 'Settings', 'Indstillinger' ),
+			tp_t( 'Settings', 'Indstillinger' ),
+			'manage_options',
+			'tp-settings',
+			[ $tp_settings, 'render' ]
+		);
+		$tp_settings->settings_hook = (string) $settings_hook;
 	} );
 }
