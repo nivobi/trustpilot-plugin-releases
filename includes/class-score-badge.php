@@ -66,6 +66,15 @@ class TP_Score_Badge {
             $link_close = '</span>';
         }
 
+        $score_html = '';
+        if ( $score > 0 ) {
+            $score_text = sprintf(
+                tp_t( '%s out of 5', '%s ud af 5' ),
+                tp_decimal( $score, 1 )
+            );
+            $score_html = '<p class="tp-score-badge__score">' . esc_html( $score_text ) . '</p>';
+        }
+
         $caption_html = '';
         if ( $count > 0 ) {
             $caption_text = sprintf(
@@ -77,6 +86,7 @@ class TP_Score_Badge {
 
         return '<div class="tp-score-badge">'
             . $link_open . $logo_html . $link_close
+            . $score_html
             . $caption_html
             . '</div>';
     }

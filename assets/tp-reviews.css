@@ -326,24 +326,38 @@
 }
 
 /* --- TrustScore badge widget ([tp_score_badge]) -------------------- */
+/* Defensive: theme/Elementor often override img sizing and link decoration,
+   so badge rules use higher specificity + !important on visual essentials. */
 .tp-score-badge {
-    display: inline-flex;
+    display: flex;
     flex-direction: column;
     align-items: center;
     gap: 4px;
     line-height: 1.4;
+    width: 100%;
+    text-align: center;
 }
-.tp-score-badge__link {
+.tp-score-badge .tp-score-badge__link {
     display: inline-block;
     line-height: 0;
-    text-decoration: none;
+    text-decoration: none !important;
+    border: 0;
+    box-shadow: none;
 }
-.tp-score-badge__logo {
-    display: block;
-    height: 32px;
-    width: auto;
+.tp-score-badge .tp-score-badge__logo {
+    display: block !important;
+    height: 40px !important;
+    width: 200px !important;
+    max-width: 100%;
+    margin: 0 auto;
 }
-.tp-score-badge__caption {
+.tp-score-badge .tp-score-badge__score {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1c1c1c;
+}
+.tp-score-badge .tp-score-badge__caption {
     margin: 0;
     font-size: 14px;
     color: #3a3a3a;
