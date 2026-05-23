@@ -96,7 +96,7 @@ class TP_Dashboard {
 		?>
 		<?php if ( $synced ) : ?>
 			<div class="notice notice-success is-dismissible">
-				<p><?php echo esc_html( tp_t( 'Sync completed successfully.', 'Synkronisering gennemf&oslash;rt.' ) ); ?></p>
+				<p><?php echo esc_html( tp_t( 'Sync completed successfully.', 'Synkronisering gennemført.' ) ); ?></p>
 			</div>
 		<?php endif; ?>
 
@@ -131,7 +131,7 @@ class TP_Dashboard {
 					<td class="tp-status-value"><?php echo $sync_display; // Already escaped above. ?></td>
 				</tr>
 				<tr>
-					<td class="tp-status-label"><?php echo esc_html( tp_t( 'Next sync', 'N&aelig;ste synkronisering' ) ); ?></td>
+					<td class="tp-status-label"><?php echo esc_html( tp_t( 'Next sync', 'Næste synkronisering' ) ); ?></td>
 					<td class="tp-status-value"><?php echo $next_display; // Already escaped above. ?></td>
 				</tr>
 				<tr>
@@ -149,7 +149,7 @@ class TP_Dashboard {
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 				<input type="hidden" name="action" value="tp_sync_now">
 				<?php wp_nonce_field( 'tp_sync_now' ); ?>
-				<?php submit_button( tp_t( 'Sync Now', 'Synkronis&eacute;r nu' ), 'secondary' ); ?>
+				<?php submit_button( tp_t( 'Sync Now', 'Synkronisér nu' ), 'secondary' ); ?>
 			</form>
 		</div>
 		<?php

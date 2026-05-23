@@ -61,9 +61,9 @@ class TP_Settings_Page {
             self::PAGE_SLUG
         );
 
-        add_settings_field( 'tp_api_key',        tp_t( 'API Key', 'API-n&oslash;gle' ),            [ $this, 'render_api_key_field'    ], self::PAGE_SLUG, 'tp_api_section' );
+        add_settings_field( 'tp_api_key',        tp_t( 'API Key', 'API-nøgle' ),            [ $this, 'render_api_key_field'    ], self::PAGE_SLUG, 'tp_api_section' );
         add_settings_field( 'tp_api_secret',      tp_t( 'API Secret', 'API-hemmelighed' ),        [ $this, 'render_api_secret_field' ], self::PAGE_SLUG, 'tp_api_section' );
-        add_settings_field( 'tp_business_domain', tp_t( 'Business Domain', 'Forretningsdom&aelig;ne' ), [ $this, 'render_domain_field'     ], self::PAGE_SLUG, 'tp_api_section' );
+        add_settings_field( 'tp_business_domain', tp_t( 'Business Domain', 'Forretningsdomæne' ), [ $this, 'render_domain_field'     ], self::PAGE_SLUG, 'tp_api_section' );
 
         register_setting( self::OPTION_GROUP, 'tp_date_format', [
             'type'              => 'string',
@@ -129,7 +129,7 @@ class TP_Settings_Page {
         );
         add_settings_field(
             'tp_sync_time',
-            tp_t( 'Run at (HH:MM)', 'K&oslash;rsel kl. (HH:MM)' ),
+            tp_t( 'Run at (HH:MM)', 'Kørsel kl. (HH:MM)' ),
             [ $this, 'render_sync_time_field' ],
             self::PAGE_SLUG,
             'tp_schedule_section'
@@ -202,7 +202,7 @@ class TP_Settings_Page {
             '<p>%s <code>%s</code>.</p>',
             esc_html( tp_t(
                 'How often the plugin pulls new Trustpilot reviews. Time-of-day applies to Daily and Weekly only and is interpreted in your site timezone:',
-                'Hvor ofte plugin\'et henter nye Trustpilot-anmeldelser. Tidspunktet g&aelig;lder kun for Dagligt og Ugentligt og fortolkes i webstedets tidszone:'
+                'Hvor ofte plugin\'et henter nye Trustpilot-anmeldelser. Tidspunktet gælder kun for Dagligt og Ugentligt og fortolkes i webstedets tidszone:'
             ) ),
             esc_html( $tz )
         );
@@ -264,7 +264,7 @@ class TP_Settings_Page {
             $fmt = get_option( 'date_format' ) . ' ' . get_option( 'time_format' );
             printf(
                 ' <span class="description">%s <code>%s</code></span>',
-                esc_html( tp_t( 'Next scheduled run:', 'N&aelig;ste planlagte k&oslash;rsel:' ) ),
+                esc_html( tp_t( 'Next scheduled run:', 'Næste planlagte kørsel:' ) ),
                 esc_html( wp_date( $fmt, $next ) )
             );
         }
@@ -367,8 +367,8 @@ class TP_Settings_Page {
     public function render_date_format_field(): void {
         $current = (string) get_option( 'tp_date_format', 'month_year' );
         $options = [
-            'month_year' => tp_t( 'Month and year (e.g. March 2024)', 'M&aring;ned og &aring;r (fx marts 2024)' ),
-            'relative'   => tp_t( 'Relative (e.g. 3 months ago)',     'Relativ (fx for 3 m&aring;neder siden)' ),
+            'month_year' => tp_t( 'Month and year (e.g. March 2024)', 'Måned og år (fx marts 2024)' ),
+            'relative'   => tp_t( 'Relative (e.g. 3 months ago)',     'Relativ (fx for 3 måneder siden)' ),
             'full_date'  => tp_t( 'Full date (e.g. 15 March 2024)',   'Fuld dato (fx 15. marts 2024)' ),
         ];
         echo '<select id="tp_date_format" name="tp_date_format">';
@@ -437,7 +437,7 @@ class TP_Settings_Page {
             add_settings_error(
                 'tp_business_domain',
                 'tp_bu_resolve_failed',
-                tp_t( 'Could not resolve Business Unit ID from domain. Check domain and API key.', 'Kunne ikke finde Business Unit ID for dom&aelig;net. Tjek dom&aelig;ne og API-n&oslash;gle.' ),
+                tp_t( 'Could not resolve Business Unit ID from domain. Check domain and API key.', 'Kunne ikke finde Business Unit ID for domænet. Tjek domæne og API-nøgle.' ),
                 'error'
             );
             return $domain;

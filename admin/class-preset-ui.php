@@ -259,7 +259,7 @@ class TP_Preset_UI {
             <h1><?php echo esc_html( tp_t( 'Trustpilot Reviews', 'Trustpilot-anmeldelser' ) ); ?></h1>
             <div id="tp-admin-root">
                 <noscript>
-                    <p><?php echo esc_html( tp_t( 'This admin dashboard requires JavaScript.', 'Denne administrationsoversigt kr&aelig;ver JavaScript.' ) ); ?></p>
+                    <p><?php echo esc_html( tp_t( 'This admin dashboard requires JavaScript.', 'Denne administrationsoversigt kræver JavaScript.' ) ); ?></p>
                 </noscript>
             </div>
         </div>
