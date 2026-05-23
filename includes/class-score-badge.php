@@ -67,10 +67,10 @@ class TP_Score_Badge {
         $caption_html = '';
         if ( $count > 0 ) {
             $caption_text = sprintf(
-                tp_t( 'based on %s reviews.', 'baseret p&aring; %s anmeldelser.' ),
+                tp_t( 'based on %s reviews.', 'baseret på %s anmeldelser.' ),
                 tp_number( $count )
             );
-            $caption_html = '<p class="tp-score-badge__caption">' . $caption_text . '</p>';
+            $caption_html = '<p class="tp-score-badge__caption">' . esc_html( $caption_text ) . '</p>';
         }
 
         return '<div class="tp-score-badge">'
