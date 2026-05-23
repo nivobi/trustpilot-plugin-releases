@@ -23,6 +23,7 @@ define( 'TP_PLUGIN_VERSION', '1.2.3' );
 define( 'TP_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'TP_PLUGIN_FILE', __FILE__ );
 
+require_once TP_PLUGIN_DIR . 'includes/tp-i18n.php';
 require_once TP_PLUGIN_DIR . 'includes/class-activator.php';
 require_once TP_PLUGIN_DIR . 'includes/class-api-client.php';
 require_once TP_PLUGIN_DIR . 'includes/class-sync-engine.php';
