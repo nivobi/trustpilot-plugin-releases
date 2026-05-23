@@ -47,6 +47,7 @@ delete_option( 'tp_sync_frequency' );
 delete_option( 'tp_sync_time' );
 delete_option( 'tp_migrations_done' );
 delete_option( 'tp_date_format' );
+delete_option( 'tp_language' );
 
 // 2b. Belt-and-suspenders sweep — anything else namespaced under `tp_` from
 //     prior versions, plus all preset-cache transients (and their timeouts).
