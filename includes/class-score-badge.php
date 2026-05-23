@@ -50,21 +50,9 @@ class TP_Score_Badge {
             : tp_t( 'See Trustpilot reviews', 'Se Trustpilot-anmeldelser' );
 
         $logo_html = sprintf(
-            '<img class="tp-score-badge__logo" src="%s" alt="Trustpilot" width="200" height="40" loading="lazy">',
+            '<img class="tp-score-badge__logo" src="%s" alt="Trustpilot" width="126" height="31" loading="lazy">',
             esc_url( $logo_src )
         );
-
-        if ( $profile_url !== '' ) {
-            $link_open  = sprintf(
-                '<a class="tp-score-badge__link" href="%s" target="_blank" rel="noopener noreferrer" aria-label="%s">',
-                esc_url( $profile_url ),
-                esc_attr( $aria_label )
-            );
-            $link_close = '</a>';
-        } else {
-            $link_open  = '<span class="tp-score-badge__link">';
-            $link_close = '</span>';
-        }
 
         $score_html = '';
         if ( $score > 0 ) {
@@ -72,7 +60,22 @@ class TP_Score_Badge {
                 tp_t( '%s out of 5', '%s ud af 5' ),
                 tp_decimal( $score, 1 )
             );
-            $score_html = '<p class="tp-score-badge__score">' . esc_html( $score_text ) . '</p>';
+            $score_html = '<span class="tp-score-badge__score">' . esc_html( $score_text ) . '</span>';
+        }
+
+        // Score + logo share a single horizontal row. The whole row is the
+        // clickable target so users can hit either to open the Trustpilot
+        // profile (falls back to a non-link span if no profile URL is set).
+        $row_inner = $score_html . $logo_html;
+        if ( $profile_url !== '' ) {
+            $row_html = sprintf(
+                '<a class="tp-score-badge__link" href="%s" target="_blank" rel="noopener noreferrer" aria-label="%s">%s</a>',
+                esc_url( $profile_url ),
+                esc_attr( $aria_label ),
+                $row_inner
+            );
+        } else {
+            $row_html = '<span class="tp-score-badge__link">' . $row_inner . '</span>';
         }
 
         $caption_html = '';
@@ -85,8 +88,7 @@ class TP_Score_Badge {
         }
 
         return '<div class="tp-score-badge">'
-            . $link_open . $logo_html . $link_close
-            . $score_html
+            . $row_html
             . $caption_html
             . '</div>';
     }
