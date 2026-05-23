@@ -76,7 +76,7 @@ class TP_Shortcode {
         <div class="tp-reviews-wrapper">
             <div class="tp-carousel">
                 <button class="tp-carousel-btn tp-carousel-prev"
-                        aria-label="<?php esc_attr_e( 'Previous', 'trustpilot-reviews' ); ?>"
+                        aria-label="<?php echo esc_attr( tp_t( 'Previous', 'Forrige' ) ); ?>"
                         disabled>
                     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                         <circle cx="12" cy="12" r="11.5" fill="none" stroke="#8C8C8C"/>
@@ -86,7 +86,7 @@ class TP_Shortcode {
 
                 <div class="tp-carousel-track" id="<?php echo esc_attr( $carousel_id ); ?>">
                     <?php if ( empty( $reviews ) ) : ?>
-                        <p class="tp-no-reviews"><?php esc_html_e( 'No reviews found.', 'trustpilot-reviews' ); ?></p>
+                        <p class="tp-no-reviews"><?php echo esc_html( tp_t( 'No reviews found.', 'Ingen anmeldelser fundet.' ) ); ?></p>
                     <?php else : ?>
                         <?php foreach ( $reviews as $review ) : ?>
                             <?php echo self::render_card( $review ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
@@ -95,7 +95,7 @@ class TP_Shortcode {
                 </div>
 
                 <button class="tp-carousel-btn tp-carousel-next"
-                        aria-label="<?php esc_attr_e( 'Next', 'trustpilot-reviews' ); ?>">
+                        aria-label="<?php echo esc_attr( tp_t( 'Next', 'Næste' ) ); ?>">
                     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="transform: rotate(180deg)">
                         <circle cx="12" cy="12" r="11.5" fill="none" stroke="#8C8C8C"/>
                         <path fill="#8C8C8C" d="M10.5088835 12l3.3080582-3.02451041c.2440777-.22315674.2440777-.5849653 0-.80812204-.2440776-.22315673-.6398058-.22315673-.8838834 0L9.18305826 11.595939c-.24407768.2231567-.24407768.5849653 0 .808122l3.75000004 3.4285714c.2440776.2231568.6398058.2231568.8838834 0 .2440777-.2231567.2440777-.5849653 0-.808122L10.5088835 12z"/>
@@ -327,13 +327,19 @@ class TP_Shortcode {
 
         $verified_html = '';
         if ( (int) $review->is_verified === 1 ) {
-            $verified_html = '<a class="tp-review-verified" href="https://help.trustpilot.com/s/article/How-do-reviews-get-on-Trustpilot?language=da" target="_blank" rel="noopener noreferrer" aria-label="' . esc_attr__( 'Inviteret anmeldelse. Klik for at få mere at vide om anmeldelsestyper', 'trustpilot-reviews' ) . '">'
+            $verified_aria = tp_t(
+                'Invited review. Click to learn more about review types',
+                'Inviteret anmeldelse. Klik for at få mere at vide om anmeldelsestyper'
+            );
+            $verified_label = tp_t( 'Invited', 'Inviteret' );
+
+            $verified_html = '<a class="tp-review-verified" href="https://help.trustpilot.com/s/article/How-do-reviews-get-on-Trustpilot?language=da" target="_blank" rel="noopener noreferrer" aria-label="' . esc_attr( $verified_aria ) . '">'
                 . '<span class="tp-verified-icon" aria-hidden="true">'
                 . '<svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" width="14" height="14">'
                 . '<path fill-rule="evenodd" clip-rule="evenodd" d="M7 14C10.866 14 14 10.866 14 7C14 3.13401 10.866 0 7 0C3.13401 0 0 3.13401 0 7C0 10.866 3.13401 14 7 14ZM6.09217 7.81401L9.20311 4.7031C9.44874 4.45757 9.84688 4.45757 10.0923 4.7031C10.338 4.94864 10.338 5.34673 10.0923 5.59226L6.62009 9.06448C6.59573 9.10283 6.56682 9.13912 6.53333 9.17256C6.28787 9.41821 5.88965 9.41821 5.64402 9.17256L3.7059 7.11031C3.46046 6.86464 3.46046 6.46669 3.7059 6.22102C3.95154 5.97548 4.34968 5.97548 4.59512 6.22102L6.09217 7.81401Z" fill="currentColor"/>'
                 . '</svg>'
                 . '</span>'
-                . esc_html( __( 'Inviteret', 'trustpilot-reviews' ) )
+                . esc_html( $verified_label )
                 . '</a>';
         }
 
@@ -400,8 +406,7 @@ class TP_Shortcode {
         ];
 
         $label = esc_html( sprintf(
-            /* translators: %d: star count 1-5 */
-            __( '%d ud af 5 stjerner', 'trustpilot-reviews' ),
+            tp_t( '%d out of 5 stars', '%d ud af 5 stjerner' ),
             $stars
         ) );
 
@@ -448,9 +453,8 @@ class TP_Shortcode {
 
             case 'relative':
                 return sprintf(
-                    /* translators: %s: human-readable time difference e.g. "3 months" */
-                    __( 'For %s siden', 'trustpilot-reviews' ),
-                    human_time_diff( $ts, time() )
+                    tp_t( '%s ago', 'For %s siden' ),
+                    tp_time_ago( $ts )
                 );
 
             case 'month_year':
@@ -478,20 +482,21 @@ class TP_Shortcode {
         $disclosure = '';
         if ( $min_stars >= 2 && $min_stars <= 5 ) {
             $star_map = [
-                2 => __( 'Viser vores 2-, 3-, 4- og 5-stjernede anmeldelser.', 'trustpilot-reviews' ),
-                3 => __( 'Viser vores 3-, 4- og 5-stjernede anmeldelser.', 'trustpilot-reviews' ),
-                4 => __( 'Viser vores 4- og 5-stjernede anmeldelser.', 'trustpilot-reviews' ),
-                5 => __( 'Viser kun vores 5-stjernede anmeldelser.', 'trustpilot-reviews' ),
+                2 => tp_t( 'Showing our 2, 3, 4 and 5-star reviews.', 'Viser vores 2-, 3-, 4- og 5-stjernede anmeldelser.' ),
+                3 => tp_t( 'Showing our 3, 4 and 5-star reviews.',    'Viser vores 3-, 4- og 5-stjernede anmeldelser.' ),
+                4 => tp_t( 'Showing our 4 and 5-star reviews.',       'Viser vores 4- og 5-stjernede anmeldelser.' ),
+                5 => tp_t( 'Showing only our 5-star reviews.',        'Viser kun vores 5-stjernede anmeldelser.' ),
             ];
             $disclosure = ' ' . esc_html( $star_map[ $min_stars ] );
         }
 
-        // "Bedømt til 4.6 / 5 baseret på 7.775 anmeldelser."
         $text = sprintf(
-            /* translators: 1: score e.g. "4.6", 2: formatted review count e.g. "7.775" */
-            __( 'Bed&oslash;mt til <strong>%1$s / 5</strong> baseret p&aring; <a href="%3$s" target="_blank" rel="noopener noreferrer">%2$s anmeldelser</a>.', 'trustpilot-reviews' ),
-            esc_html( (string) $score ),
-            esc_html( number_format( $count, 0, ',', '.' ) ),
+            tp_t(
+                'Rated <strong>%1$s / 5</strong> based on <a href="%3$s" target="_blank" rel="noopener noreferrer">%2$s reviews</a>.',
+                'Bed&oslash;mt til <strong>%1$s / 5</strong> baseret p&aring; <a href="%3$s" target="_blank" rel="noopener noreferrer">%2$s anmeldelser</a>.'
+            ),
+            esc_html( tp_decimal( (float) $score, 1 ) ),
+            esc_html( tp_number( (int) $count ) ),
             esc_url( $profile_url )
         );
 
