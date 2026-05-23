@@ -87,11 +87,13 @@ if ( is_admin() ) {
 	require_once TP_PLUGIN_DIR . 'admin/class-settings-page.php';
 	require_once TP_PLUGIN_DIR . 'admin/class-dashboard.php';
 	require_once TP_PLUGIN_DIR . 'admin/class-preset-ui.php';
+	require_once TP_PLUGIN_DIR . 'admin/class-widgets-ui.php';
 
 	$tp_settings = new TP_Settings_Page();
 	$tp_settings->register_hooks();
 	TP_Dashboard::register_hooks();
 	TP_Preset_UI::register_hooks();
+	TP_Widgets_UI::register_hooks();
 
 	add_action( 'admin_menu', function() use ( $tp_settings ) {
 		// Top-level menu item — Dashboard is the default landing page.
@@ -126,5 +128,16 @@ if ( is_admin() ) {
 			[ $tp_settings, 'render' ]
 		);
 		$tp_settings->settings_hook = (string) $settings_hook;
+
+		// Third sub-page — Widgets.
+		$widgets_hook = add_submenu_page(
+			'tp-reviews',
+			tp_t( 'Widgets', 'Widgets' ),
+			tp_t( 'Widgets', 'Widgets' ),
+			'manage_options',
+			'tp-widgets',
+			[ 'TP_Widgets_UI', 'render' ]
+		);
+		TP_Widgets_UI::$widgets_hook = (string) $widgets_hook;
 	} );
 }
